@@ -136,7 +136,7 @@ try:
     col_actual = "Omzet_Actual"
     
     st.title("Platform Audit & Performa Cabang")
-    st.caption("Aplikasi Analisis Data Terpadu — Riset Lapangan & Prediksi Multi-Model 2026")
+    st.caption("Aplikasi Analisis Data Terpadu — Riset & Prediksi Multi-Model 2026")
 
     model_terpilih = st.selectbox(
         "Pilih Model Prediksi sebagai Basis Analisis:",

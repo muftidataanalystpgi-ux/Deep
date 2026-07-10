@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 st.set_page_config(page_title="Deep-Dive Analisis", layout="wide")
-st.title("🔍 Deep-Dive Geografis & Audit Laporan Form Riset")
+st.title("Deep-Dive Geografis & Audit Laporan Form Riset")
 
 # Dummy Load dari gabungan baris CSV Anda
 # Di dunia nyata, Anda tinggal mengambil baris cabang tertentu berdasarkan filter
@@ -36,21 +36,21 @@ with col_features:
     st.info("🤖 **Kondisi Fitur Model (Data Kuantitatif di CSV)**")
     
     # Kelompokkan visualisasi berdasarkan variabel Anda
-    st.markdown("#### 📍 Aspek Makro & Properti")
+    st.markdown("####  Aspek Makro & Properti")
     st.write(f"- **Nilai UMK daerah:** Rp {cabang_data['umk']:,}")
     st.write(f"- **Lebar Ruko:** {cabang_data['lebar_ruko']} Meter")
     st.write(f"- **Premium Spot Score:** {cabang_data['premium_spot_score']}/100")
     
-    st.markdown("#### 🗺️ Aspek Spasial & Kompetisi")
+    st.markdown("####  Aspek Spasial & Kompetisi")
     st.write(f"- **Jumlah Kompetitor Terdekat:** {cabang_data['jumlah_kompetitor']}")
     st.write(f"- **Cabang Referensi Terdekat:** {cabang_data['Cabang_Terdekat_Ref']}")
     st.write(f"- **Jarak ke Cabang Referensi:** {cabang_data['Jarak_Ref_KM']} KM")
 
 with col_form:
-    st.warning("📋 **Input Konteks Kualitatif (Data Hasil Google Form)**")
+    st.warning(" **Input Konteks Kualitatif (Data Hasil Google Form)**")
     
     # Bagian ini membaca text input / form kualitatif yang diisi manual oleh tim cabang Anda
-    st.markdown("#### 💬 Alasan Kesenjangan / Kendala Lapangan")
+    st.markdown("####  Alasan Kesenjangan / Kendala Lapangan")
     
     # Contoh logic penayangan dinamis berdasarkan nama_cabang
     if pilihan_cabang == 'MDN001':

@@ -208,7 +208,7 @@ try:
             st.metric(label=f"Total Prediksi Model ({model_terpilih})", value=f"Rp {df[col_pred].sum():,.0f}")
         with col3:
             total_mismatch = len(df[df[col_mismatch] == 'Mismatch'])
-            st.metric(label=f"Cabang Mismatch ({model_terpilih}) 🚨", value=total_mismatch)
+            st.metric(label=f"Cabang Mismatch ({model_terpilih}) ", value=total_mismatch)
         with col4:
             if COL_SARAN in df.columns:
                 terisi = df[COL_SARAN].notna() & (df[COL_SARAN].astype(str).str.strip() != "-")
@@ -276,7 +276,7 @@ try:
     # TAB 2: INVESTIGASI DEEP-DIVE CABANG
     # =========================================================================
     with tab_deep:
-        st.markdown("### Lembar Kerja Audit Lapangan per Cabang")
+        st.markdown("### Lembar Kerja Audit Survei per Cabang")
 
         col_f1, col_f2, col_f3 = st.columns([1, 1, 2])
         with col_f1:
@@ -513,7 +513,7 @@ try:
         st.markdown("---")
         st.subheader("B. Priority Action Matrix (Impact vs Actionability)")
         if "Kategori_Kendala" in df_mismatch.columns and len(df_mismatch) > 0:
-            FAKTOR_INTERNAL = {"SDM & Operasional", "Sistem & Stok/Plafon", "Fisik Bangunan/Ruko"}
+            FAKTOR_INTERNAL = {"SDM & Operasional", "Sistem & Plafon", "Fisik Bangunan/Ruko"}
             FAKTOR_EKSTERNAL = {"Kompetitor / Persaingan", "Akses & Parkir", "Ekonomi & Daya Beli"}
 
             def _actionability(kategori_list):

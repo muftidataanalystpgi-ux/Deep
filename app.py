@@ -36,15 +36,15 @@ try:
     col_mismatch = "Mismatch_RF"
     
     # TITLE & HEADER UTAMA
-    st.title("📊 Platform Audit & Performa Cabang")
+    st.title("Platform Audit & Performa Cabang")
     st.caption("Aplikasi Analisis Data Terpadu — Riset & Prediksi Multi-Model 2026")
     
     # -------------------------------------------------------------------------
     # NAVIGATION TABS (Standar SaaS Modern - Horizontal di Bagian Atas)
     # -------------------------------------------------------------------------
     tab_executive, tab_deep_dive = st.tabs([
-        "📈 Ringkasan Eksekutif", 
-        "🔍 Investigasi Deep-Dive Cabang"
+        "Ringkasan Eksekutif", 
+        "Investigasi Deep-Dive Cabang"
     ])
     
     # =========================================================================
@@ -61,7 +61,7 @@ try:
             st.metric(label="Total Prediksi Model (Random Forest)", value=f"Rp {df[col_pred_rf].sum():,.0f}")
         with col3:
             total_mismatch = len(df[df[col_mismatch] == 'Mismatch'])
-            st.metric(label="Cabang Mismatch Terdeteksi (RF) 🚨", value=total_mismatch)
+            st.metric(label="Cabang Mismatch Terdeteksi (RF) ", value=total_mismatch)
             
         st.markdown("---")
         
@@ -110,7 +110,7 @@ try:
             # Mengunci baris data entitas terpilih
             row = df[df['Nama Cabang'] == pilihan_cabang].iloc[0]
             
-            st.markdown(f"#### 🏢 Profil Target: **{row['Nama Cabang']}** ({row['Kabupaten']})")
+            st.markdown(f"####  Profil Target: **{row['Nama Cabang']}** ({row['Kabupaten']})")
             
             # Mini Metrics Korporat
             col_m1, col_m2, col_m3, col_m4 = st.columns(4)
@@ -133,10 +133,10 @@ try:
             
             # SISI KIRI: INDIKATOR MODEL (KUANTITATIF)
             with col_left:
-                st.info("🤖 **Kondisi Fitur Model (Sisi Kuantitatif)**")
+                st.info(" **Kondisi Fitur Model (Sisi Kuantitatif)**")
                 
                 with st.container(border=True):
-                    st.markdown("##### 📊 Demografi & Wilayah")
+                    st.markdown("#####  Demografi & Wilayah")
                     st.write(f"- **Kategori Wilayah (Mapped):** {row['kategori_wilayah_mapped']}")
                     st.write(f"- **Tipe Jalan (Mapped):** {row['jalan_mapped']}")
                     st.write(f"- **Total Penduduk Sekitar:** {row['penduduk']:,} Jiwa")
@@ -145,7 +145,7 @@ try:
                     st.write(f"- **UMK Wilayah:** Rp {row['umk']:,}")
                     
                 with st.container(border=True):
-                    st.markdown("##### 🛒 Komersial & Infrastruktur Spasial")
+                    st.markdown("#####  Komersial & Infrastruktur Spasial")
                     st.write(f"- **Lebar Ruko:** {row['lebar_ruko']} Meter")
                     st.write(f"- **Commercial Hub Index:** {row['commercial_hub_index']}")
                     st.write(f"- **Jumlah Kompetitor Spasial:** {row['jumlah_kompetitor']}")
@@ -155,9 +155,9 @@ try:
                     
             # SISI KANAN: JAWABAN REAL LAPANGAN (KUALITATIF)
             with col_right:
-                st.warning("📋 **Realitas Riil Lapangan (Hasil Form Riset Lapangan)**")
+                st.warning(" **Realitas Riil Lapangan (Hasil Form Riset Lapangan)**")
                 
-                with st.expandable("👥 1. Kendala SDM & Operasional Cabang", expanded=True):
+                with st.expandable(" 1. Kendala SDM & Operasional Cabang", expanded=True):
                     st.write(f"**Lama Beroperasi:** {row['Sudah beroperasi berapa lama cabang anda?']}")
                     st.write(f"**Nama Kanit:** {row['Nama Kanit Cabang']} ({row['Jabatan Karyawan']})")
                     st.write(f"**Jumlah Karyawan Aktif:** {row['Jumlah Karyawan Cabang Aktif Saat Ini']}")
@@ -165,28 +165,28 @@ try:
                     st.write(f"**Waktu Transaksi:** {row['Rata-rata waktu satu kali transaksi (menit) ?']} Menit")
                     st.write(f"**Kendala Hambatan Taksiran:** {row['Kendala utama yang memperlambat proses taksiran ?']}")
 
-                with st.expandable("📍 2. Aksesibilitas Ruko & Kondisi Fisik"):
+                with st.expandable(" 2. Aksesibilitas Ruko & Kondisi Fisik"):
                     st.write(f"**Keterlihatan Ruko dari Jalan:** {row['Seberapa mudah kantor cabang terlihat dari jalan raya?']}")
                     st.write(f"**Arah Hadap Bangunan:** {row['Arah hadap bangunan cabang']}")
                     st.write(f"**Kondisi Papan Nama/Branding:** {row['Kondisi papan nama / branding cabang']}")
                     st.write(f"**Kondisi Parkir Depan Cabang:** {row['Kondisi parkir di depan cabang — mudah/sulit, berbayar/gratis?']}")
                     st.write(f"**Isu Banjir / Akses Musiman:** {row['Apakah lokasi sering banjir atau ada kendala akses musiman?']}")
 
-                with st.expandable("⚔️ 3. Dinamika Persaingan & Pasar Bebas"):
+                with st.expandable(" 3. Dinamika Persaingan & Pasar Bebas"):
                     st.write(f"**Jumlah Kompetitor Pengamatan Lapangan:** {row['Berapa jumlah kompetitor dalam radius 500 m ?']}")
                     st.write(f"**Nama-Nama Kompetitor:** {row['Jika ada kompetitor, sebutkan namanya']}")
                     st.write(f"**Dampak Persaingan Terberat:** {row['Kompetitor yang paling dirasakan dampak persaingannya? (pegadaian swasta, koperasi simpan pinjam, bpr, rentenir, dll)']}")
-                    st.error(f"**🚨 Kompetitor Baru (3 Bulan Terakhir):** {row['Kompetitor baru yang muncul belakangan ini atau akhir-akhir ini (3 bulan terakhir). Nama & lokasi?']}")
+                    st.error(f"** Kompetitor Baru (3 Bulan Terakhir):** {row['Kompetitor baru yang muncul belakangan ini atau akhir-akhir ini (3 bulan terakhir). Nama & lokasi?']}")
                     st.write(f"**Alasan Nasabah Pilih Kompetitor:** {row['Alasan utama nasabah memilih kompetitor dibanding kita (jika ada)']}")
 
-                with st.expandable("📈 4. Karakteristik Nasabah & Pola Musiman"):
+                with st.expandable(" 4. Karakteristik Nasabah & Pola Musiman"):
                     st.write(f"**Tipe Nasabah Dominan:** {row['Tipe nasabah yang paling dominan?']}")
                     st.write(f"**Estimasi KK dalam Radius 500m:** {row['Perkiraan jumlah KK yang tinggal dalam radius 500 m cabang']}")
                     st.write(f"**Detail Pola Musiman Omset:** {row['Ceritakan detail pola musiman yang dirasakan karyawan']}")
             
             # BAGIAN BAWAH: REKOMENDASI STRATEGIS TIM CABANG
             st.markdown("---")
-            st.subheader("💡 Saran, Kendala Kritis & Rekomendasi Strategis Tim Cabang 2026")
+            st.subheader(" Saran, Kendala Kritis & Rekomendasi Strategis Tim Cabang 2026")
             st.success(f"\"{row['Tuliskan saran, kendala kritis, atau rekomendasi strategis lainnya dari tim cabang untuk optimalisasi performa bisnis 2026']}\"")
 
 except Exception as e:

@@ -1,67 +1,120 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Deep-Dive Analisis", layout="wide")
-st.title("Deep-Dive Geografis & Audit Laporan Form Riset")
-
-# Dummy Load dari gabungan baris CSV Anda
-# Di dunia nyata, Anda tinggal mengambil baris cabang tertentu berdasarkan filter
-@st.cache_data
-def load_full_features():
-    return pd.DataFrame({
-        'nama_cabang': ['MDN001', 'KNG014', 'PTI001'],
-        'umk': [4500000, 3200000, 2800000],
-        'lebar_ruko': [8, 6, 7],
-        'jumlah_kompetitor': [1, 3, 2],
-        'premium_spot_score': [85, 45, 70],
-        'Jarak_Ref_KM': [0.5, 3.2, 1.8],
-        'Cabang_Terdekat_Ref': ['MDN004', 'KNG002', 'PTI003']
-    })
-
-df_feat = load_full_features()
-
-# --- SIDEBAR FILTER ---
-st.sidebar.header("Navigasi Cabang")
-pilihan_cabang = st.sidebar.selectbox("Pilih Cabang untuk Di-audit:", df_feat['nama_cabang'].tolist())
-
-# Ambil data spesifik cabang yang dipilih
-cabang_data = df_feat[df_feat['nama_cabang'] == pilihan_cabang].iloc[0]
-
-st.markdown(f"### Audit Indikator & Feedback Lapangan: **{pilihan_cabang}**")
-
-# --- KOMPARASI DUA SISI ---
-col_features, col_form = st.columns(2)
-
-with col_features:
-    st.info("🤖 **Kondisi Fitur Model (Data Kuantitatif di CSV)**")
-    
-    # Kelompokkan visualisasi berdasarkan variabel Anda
-    st.markdown("####  Aspek Makro & Properti")
-    st.write(f"- **Nilai UMK daerah:** Rp {cabang_data['umk']:,}")
-    st.write(f"- **Lebar Ruko:** {cabang_data['lebar_ruko']} Meter")
-    st.write(f"- **Premium Spot Score:** {cabang_data['premium_spot_score']}/100")
-    
-    st.markdown("####  Aspek Spasial & Kompetisi")
-    st.write(f"- **Jumlah Kompetitor Terdekat:** {cabang_data['jumlah_kompetitor']}")
-    st.write(f"- **Cabang Referensi Terdekat:** {cabang_data['Cabang_Terdekat_Ref']}")
-    st.write(f"- **Jarak ke Cabang Referensi:** {cabang_data['Jarak_Ref_KM']} KM")
-
-with col_form:
-    st.warning(" **Input Konteks Kualitatif (Data Hasil Google Form)**")
-    
-    # Bagian ini membaca text input / form kualitatif yang diisi manual oleh tim cabang Anda
-    st.markdown("####  Alasan Kesenjangan / Kendala Lapangan")
-    
-    # Contoh logic penayangan dinamis berdasarkan nama_cabang
-    if pilihan_cabang == 'MDN001':
-        st.error("**Kendala Aksesibilitas:** 'Meskipun Premium Spot Score tinggi, jalanan di depan ruko sedang dibongkar untuk perbaikan drainase kota total sejak awal bulan. Parkir mobil/motor lumpuh.'")
-        st.markdown("**Catatan Kompetisi:** '1 Kompetitor melakukan promo potong admin besar-besaran untuk mengalihkan rute konsumen.'")
-    elif pilihan_cabang == 'PTI001':
-        st.error("**Kendala Operasional:** 'Stok inventaris terlambat datang dari gudang pusat regional, banyak konsumen yang membatalkan transaksi karena barang kosong.'")
-    else:
-        st.success("Belum ada kendala kritikal yang dilaporkan atau cabang berstatus Match.")
-
+st.set_page_config(page_title="Deep-Dive Audit Cabang", layout="wide")
+st.title("🔍 Deep-Dive Komparasi Fitur Model vs Realitas Lapangan")
 st.markdown("---")
-# Menampilkan peta sederhana jika longitude & latitude dimasukkan
-st.subheader("Lokasi Cabang Terkait")
-st.caption("Gunakan data latitude dan longitude dari CSV Anda untuk memetakan sebaran titik rawan mismatch.")
+
+# Fungsi Re-use data dari link
+@st.cache_data(ttl=3600)
+def load_data_from_link():
+    sheet_id = "1Uh7sSoiGVQGB9QJWcsNvXIQsZJUXlOA5x_OVxpFCtrA"
+    gid_summary = "1761779832"
+    url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv&gid={gid_summary}"
+    df = pd.read_csv(url)
+    df.columns = df.columns.str.strip()
+    if 'Mismatch_RF' in df.columns:
+        df['Mismatch_RF'] = df['Mismatch_RF'].fillna('Match')
+    return df
+
+try:
+    df = load_data_from_link()
+    
+    # --- FILTER SIDEBAR ---
+    st.sidebar.header("Navigasi Audit")
+    status_mismatch = st.sidebar.selectbox("Filter Status Cabang:", ["Semua Cabang", "Hanya Mismatch RF"])
+
+    if status_mismatch == "Hanya Mismatch RF":
+        list_cabang = df[df['Mismatch_RF'] == 'Mismatch']['Nama Cabang'].tolist()
+    else:
+        list_cabang = df['Nama Cabang'].tolist()
+
+    if not list_cabang:
+        st.warning("Tidak ada cabang yang memenuhi kriteria filter.")
+    else:
+        pilihan_cabang = st.sidebar.selectbox("Pilih Cabang untuk Di-audit:", list_cabang)
+        
+        # Ambil 1 baris data spesifik cabang yang dipilih
+        row = df[df['Nama Cabang'] == pilihan_cabang].iloc[0]
+
+        # --- HEADER UTAMA ---
+        st.markdown(f"## 🏢 Cabang: **{row['Nama Cabang']}** ({row['Kabupaten']})")
+        
+        col_perf1, col_perf2, col_perf3, col_perf4 = st.columns(4)
+        with col_perf1:
+            st.metric(label="Omzet Actual", value=f"Rp {row['Omzet_Actual']:,}")
+        with col_perf2:
+            st.metric(label="Prediksi Model RF", value=f"Rp {row['Prediksi_Omzet_RF']:,}")
+        with col_perf3:
+            st.metric(label="Premium Spot Score", value=f"{row['premium_spot_score']}/100")
+        with col_perf4:
+            if row['Mismatch_RF'] == 'Mismatch':
+                st.error(f"Status: {row['Mismatch_RF']}")
+            else:
+                st.success(f"Status: {row['Mismatch_RF']}")
+
+        st.markdown("---")
+
+        # --- AUDIT DUA SISI ---
+        col_left, col_right = st.columns(2)
+
+        # 🤖 SISI KIRI: INDIKATOR DATA KUANTITATIF (MODEL)
+        with col_left:
+            st.info("🤖 **Kondisi Fitur Model (Sisi Kuantitatif)**")
+            
+            with st.container(border=True):
+                st.markdown("#### 📊 Demografi & Wilayah")
+                st.write(f"- **Kategori Wilayah (Mapped):** {row['kategori_wilayah_mapped']}")
+                st.write(f"- **Tipe Jalan (Mapped):** {row['jalan_mapped']}")
+                st.write(f"- **Total Penduduk Sekitar:** {row['penduduk']:,} Jiwa")
+                st.write(f"- **Proporsi Usia Produktif:** {row['proporsi_usia_produktif'] * 100:.1f}%")
+                st.write(f"- **Tingkat Kemiskinan:** {row['kemiskinan']}")
+                st.write(f"- **UMK Wilayah:** Rp {row['umk']:,}")
+                
+            with st.container(border=True):
+                st.markdown("#### 🛒 Hub Komersial & Infrastruktur Spasial")
+                st.write(f"- **Lebar Ruko:** {row['lebar_ruko']} Meter")
+                st.write(f"- **Commercial Hub Index:** {row['commercial_hub_index']}")
+                st.write(f"- **Jumlah Kompetitor Spasial:** {row['jumlah_kompetitor']}")
+                st.write(f"- **Fasilitas Belanja:** {row['jumlah_fasilitas_belanja']}")
+                st.write(f"- **Jumlah Toko Ponsel:** {row['jumlah_toko_ponsel']}")
+                st.write(f"- **Jarak ke Pasar Terdekat:** {row['jarak_pasar']} Meter")
+
+        # 📋 SISI KANAN: REALITAS KUALITATIF SURVEI (LAPANGAN)
+        with col_right:
+            st.warning("📋 **Realitas Riil Lapangan (Hasil Form Riset Lapangan)**")
+            
+            with st.expandable("👥 1. Kendala SDM & Operasional Cabang", expanded=True):
+                st.write(f"**Lama Beroperasi:** {row['Sudah beroperasi berapa lama cabang anda?']}")
+                st.write(f"**Nama Kanit:** {row['Nama Kanit Cabang']} ({row['Jabatan Karyawan']})")
+                st.write(f"**Jumlah Karyawan Aktif:** {row['Jumlah Karyawan Cabang Aktif Saat Ini']}")
+                st.write(f"**Kendala Utama SDM:** {row['Kendala utama terkait pengelolaan SDM di cabang saat ini']}")
+                st.write(f"**Waktu Transaksi:** {row['Rata-rata waktu satu kali transaksi (menit) ?']} Menit")
+                st.write(f"**Kendala Hambatan Taksiran:** {row['Kendala utama yang memperlambat proses taksiran ?']}")
+
+            with st.expandable("📍 2. Aksesibilitas Ruko & Kondisi Fisik"):
+                st.write(f"**Keterlihatan Ruko dari Jalan:** {row['Seberapa mudah kantor cabang terlihat dari jalan raya?']}")
+                st.write(f"**Arah Hadap Bangunan:** {row['Arah hadap bangunan cabang']}")
+                st.write(f"**Kondisi Papan Nama/Branding:** {row['Kondisi papan nama / branding cabang']}")
+                st.write(f"**Kondisi Parkir Depan Cabang:** {row['Kondisi parkir di depan cabang — mudah/sulit, berbayar/gratis?']}")
+                st.write(f"**Isu Banjir / Akses Musiman:** {row['Apakah lokasi sering banjir atau ada kendala akses musiman?']}")
+
+            with st.expandable("⚔️ 3. Dinamika Persaingan & Pasar Bebas"):
+                st.write(f"**Jumlah Kompetitor Pengamatan Lapangan:** {row['Berapa jumlah kompetitor dalam radius 500 m ?']}")
+                st.write(f"**Nama-Nama Kompetitor:** {row['Jika ada kompetitor, sebutkan namanya']}")
+                st.write(f"**Dampak Persaingan Terberat:** {row['Kompetitor yang paling dirasakan dampak persaingannya? (pegadaian swasta, koperasi simpan pinjam, bpr, rentenir, dll)']}")
+                st.error(f"**🚨 Kompetitor Baru (3 Bulan Terakhir):** {row['Kompetitor baru yang muncul belakangan ini atau akhir-akhir ini (3 bulan terakhir). Nama & lokasi?']}")
+                st.write(f"**Alasan Nasabah Pilih Kompetitor:** {row['Alasan utama nasabah memilih kompetitor dibanding kita (jika ada)']}")
+
+            with st.expandable("📈 4. Karakteristik Nasabah & Pola Musiman"):
+                st.write(f"**Tipe Nasabah Dominan:** {row['Tipe nasabah yang paling dominan?']}")
+                st.write(f"**Estimasi KK dalam Radius 500m:** {row['Perkiraan jumlah KK yang tinggal dalam radius 500 m cabang']}")
+                st.write(f"**Detail Pola Musiman Omset:** {row['Ceritakan detail pola musiman yang dirasakan karyawan']}")
+
+        # --- BAGIAN BAWAH: REKOMENDASI STRATEGIS ---
+        st.markdown("---")
+        st.subheader("💡 Saran, Kendala Kritis & Rekomendasi Strategis Tim Cabang 2026")
+        st.success(f"\"{row['Tuliskan saran, kendala kritis, atau rekomendasi strategis lainnya dari tim cabang untuk optimalisasi performa bisnis 2026']}\"")
+
+except Exception as e:
+    st.error(f"Gagal memuat data pada halaman deep dive. Pesan Error: {e}")

@@ -99,26 +99,8 @@ def top_kata(seri_teks: pd.Series, n=40):
     return Counter(kata_bersih).most_common(n)
 
 # =============================================================================
-# 4. FUNGSI KLASIFIKASI KUADRAN PERFORMA
+# 4. FUNGSI KLASIFIKASI K-MEANS KUADRAN
 # =============================================================================
-def klasifikasikan_kuadran(df, col_actual, col_pred):
-    med_actual = df[col_actual].median()
-    med_pred = df[col_pred].median()
-
-    def _kuadran(row):
-        aktual_tinggi = row[col_actual] >= med_actual
-        pred_tinggi = row[col_pred] >= med_pred
-        if not aktual_tinggi and pred_tinggi:
-            return "Over-Predicted"
-        elif aktual_tinggi and not pred_tinggi:
-            return "Under-Predicted"
-        elif aktual_tinggi and pred_tinggi:
-            return "On-Track"
-        else:
-            return "Under-Performing"
-
-    return df.apply(_kuadran, axis=1), med_actual, med_pred
-
 def klasifikasikan_kuadran_kmeans(df, col_kat_actual, col_kat_pred):
     def _kuadran(row):
         kat_act = str(row[col_kat_actual]).strip()
@@ -147,8 +129,8 @@ try:
     # Inisialisasi Pilihan Model Global
     MODEL_MAP = {
         "Random Forest": ("Prediksi_Omzet_RF", "Mismatch_RF", "Kategori_Prediksi_RF"),
-        "OLS": ("Prediksi_Omzet_OLS", "Mismatch_OLS", "Kategori_Prediksi_OLS"), # Sesuaikan jika kolom k-means OLS ada
-        "GWR": ("Prediksi_Omzet_GWR", "Mismatch_GWR", "Kategori_Prediksi_GWR"), # Sesuaikan jika kolom k-means GWR ada
+        "OLS": ("Prediksi_Omzet_OLS", "Mismatch_OLS", "Kategori_Prediksi_OLS"),
+        "GWR": ("Prediksi_Omzet_GWR", "Mismatch_GWR", "Kategori_Prediksi_GWR"),
     }
 
     col_actual = "Omzet_Actual"
@@ -163,18 +145,16 @@ try:
     )
     col_pred, col_mismatch, col_kat_pred = MODEL_MAP[model_terpilih]
 
-    # Eksekusi Klasifikasi Klaster K-Means/Kuadran dinamis 
+    # MURNI MENGGUNAKAN K-MEANS KLASTER UNTUK KUADRAN PERFORMA
     if 'Kategori_Omzet_Actual' in df.columns and col_kat_pred in df.columns:
         df['Kuadran_Performa'] = klasifikasikan_kuadran_kmeans(
             df, 
             col_kat_actual='Kategori_Omzet_Actual', 
             col_kat_pred=col_kat_pred
         )
-        # fallback jika median info diperlukan
-        _, med_actual, med_pred = klasifikasikan_kuadran(df, col_actual, col_pred)
     else:
-        # Fallback ke median kuadran lama jika kolom bawaan K-Means sheets hilang
-        df["Kuadran_Performa"], med_actual, med_pred = klasifikasikan_kuadran(df, col_actual, col_pred)
+        st.error("Kolom klaster K-Means ('Kategori_Omzet_Actual' atau Kategori Prediksi) tidak ditemukan pada data sumber.")
+        st.stop()
 
     # Pemrosesan Kolom Bantu Teks & Sentimen
     COL_SDM = "Kendala utama terkait pengelolaan SDM di cabang saat ini"
@@ -219,7 +199,7 @@ try:
     # TAB 1: RINGKASAN EKSEKUTIF
     # =========================================================================
     with tab_exec:
-        st.markdown(f"### Performa Global & Validasi Model — Basis: **{model_terpilih}**")
+        st.markdown(f"### Performa Global & Validasi Model K-Means — Basis: **{model_terpilih}**")
 
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -241,7 +221,7 @@ try:
 
         col_a, col_b = st.columns([2, 1])
         with col_a:
-            st.subheader("Scatter Plot: Realisasi vs Prediksi (per Kuadran)")
+            st.subheader("Scatter Plot: Realisasi vs Prediksi (K-Means Klaster)")
             fig = px.scatter(
                 df,
                 x=col_pred,
@@ -253,7 +233,9 @@ try:
                     'On-Track': '#2ecc71',        # Hijau
                     'Over-Predicted': '#e74c3c',   # Merah (Kritis Audit)
                     'Under-Predicted': '#3498db',  # Biru
-                    'Under-Performing': '#95a5a6'  # Abu-abu
+                    'Under-Performing': '#95a5a6', # Abu-abu
+                    'Tidak Terdefinisi': '#f1c40f',# Kuning
+                    'Lainnya': '#9b59b6'          # Ungu
                 }
             )
             fig.add_shape(
@@ -264,14 +246,16 @@ try:
             st.plotly_chart(fig, use_container_width=True)
 
         with col_b:
-            st.subheader("Distribusi Kuadran")
+            st.subheader("Distribusi Klaster Performa")
             fig_pie = px.pie(df, names="Kuadran_Performa", hole=0.4,
                              color="Kuadran_Performa",
                              color_discrete_map={
                                 'On-Track': '#2ecc71',
                                 'Over-Predicted': '#e74c3c',
                                 'Under-Predicted': '#3498db',
-                                'Under-Performing': '#95a5a6'
+                                'Under-Performing': '#95a5a6',
+                                'Tidak Terdefinisi': '#f1c40f',
+                                'Lainnya': '#9b59b6'
                              })
             st.plotly_chart(fig_pie, use_container_width=True)
 
@@ -299,14 +283,14 @@ try:
             status_mismatch = st.selectbox("Saring Status:", ["Semua Cabang", f"Hanya Mismatch ({model_terpilih})"])
         with col_f2:
             filter_kuadran = st.selectbox(
-                "Saring Kuadran:",
-                ["Semua Kuadran", "Over-Predicted", "Under-Predicted", "On-Track", "Under-Performing"]
+                "Saring Klaster Performa (K-Means):",
+                ["Semua Klaster", "Over-Predicted", "Under-Predicted", "On-Track", "Under-Performing", "Tidak Terdefinisi"]
             )
 
         df_filtered = df.copy()
         if status_mismatch != "Semua Cabang":
             df_filtered = df_filtered[df_filtered[col_mismatch] == 'Mismatch']
-        if filter_kuadran != "Semua Kuadran":
+        if filter_kuadran != "Semua Klaster":
             df_filtered = df_filtered[df_filtered["Kuadran_Performa"] == filter_kuadran]
 
         list_cabang = df_filtered['Nama Cabang'].tolist()
@@ -331,7 +315,7 @@ try:
             with col_m3:
                 st.metric(label="Premium Spot Score", value=f"{row.get('premium_spot_score', '-')}/100")
             with col_m4:
-                st.metric(label="Kuadran", value=row.get("Kuadran_Performa", "-"))
+                st.metric(label="Klaster K-Means", value=row.get("Kuadran_Performa", "-"))
             with col_m5:
                 skor_sdm = row.get("Sentimen_SDM_Skor", 0)
                 label_sdm = row.get("Sentimen_SDM_Label", "-")
@@ -371,11 +355,12 @@ try:
                     st.write(f"- **Kepadatan Kompetitor/Populasi:** {row.get('comp_per_pop', '-')}")
 
                 with st.container(border=True):
-                    st.markdown("##### Evaluasi Multi-Model (Prediction Gap)")
+                    st.markdown("##### Evaluasi Klastering & Multi-Model")
+                    st.write(f"- **Klaster Omzet Aktual:** {row.get('Kategori_Omzet_Actual', '-')}")
+                    st.write(f"- **Klaster Omzet Prediksi:** {row.get(col_kat_pred, '-')}")
                     st.write(f"- **Prediksi OLS:** Rp {row.get('Prediksi_Omzet_OLS', 0):,}")
                     st.write(f"- **Prediksi RF:** Rp {row.get('Prediksi_Omzet_RF', 0):,}")
                     st.write(f"- **Prediksi GWR:** Rp {row.get('Prediksi_Omzet_GWR', 0):,}")
-                    st.write(f"- **Klaster Omzet:** {row.get('Klaster_Omzet', '-')}")
 
             with col_right:
                 st.warning(" **Realitas Riil Lapangan (Hasil Form Riset Lapangan)**")
@@ -429,15 +414,15 @@ try:
             filter_wilayah = st.selectbox("Filter Kabupaten/Wilayah:", wilayah_opsi)
         with col_filt2:
             filter_kuadran_naratif = st.selectbox(
-                "Filter Kuadran Performa:",
-                ["Semua Kuadran", "Over-Predicted", "Under-Predicted", "On-Track", "Under-Performing"],
+                "Filter Klaster Performa (K-Means):",
+                ["Semua Klaster", "Over-Predicted", "Under-Predicted", "On-Track", "Under-Performing", "Tidak Terdefinisi"],
                 key="filter_kuadran_naratif"
             )
 
         df_naratif = df.copy()
         if filter_wilayah != "Semua Wilayah":
             df_naratif = df_naratif[df_naratif["Kabupaten"] == filter_wilayah]
-        if filter_kuadran_naratif != "Semua Kuadran":
+        if filter_kuadran_naratif != "Semua Klaster":
             df_naratif = df_naratif[df_naratif["Kuadran_Performa"] == filter_kuadran_naratif]
 
         st.markdown("---")
@@ -518,7 +503,9 @@ try:
                 'On-Track': '#2ecc71',        # Hijau
                 'Over-Predicted': '#e74c3c',   # Merah (Kritis Audit)
                 'Under-Predicted': '#3498db',  # Biru
-                'Under-Performing': '#95a5a6'  # Abu-abu
+                'Under-Performing': '#95a5a6', # Abu-abu
+                'Tidak Terdefinisi': '#f1c40f',# Kuning
+                'Lainnya': '#9b59b6'          # Ungu
             }
         )
         st.plotly_chart(fig_km, use_container_width=True)

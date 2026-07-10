@@ -1,10 +1,10 @@
 import streamlit as st
 
 st.set_page_config(page_title="Feedback Loop", layout="wide")
-st.title("💻 Feedback Loop & Data Scientist Corner")
+st.title(" Feedback Loop & Data Scientist Corner")
 st.markdown("---")
 
-st.subheader("💡 Validasi Validitas Fitur Model Berdasarkan Hasil Riset")
+st.subheader(" Validasi Validitas Fitur Model Berdasarkan Hasil Riset")
 
 st.markdown("""
 ### 1. Matrix Fitur Bermasalah (*Feature Validity*)
@@ -17,4 +17,4 @@ Berdasarkan keluhan yang paling sering muncul di Google Form Riset Cabang, tim D
 2.  `indikator_promo_kompetitor` (Boolean: True/False).
 """)
 
-st.success("🎯 **Target Kerja Sama:** Mengintegrasikan data kualitatif form ini menjadi komponen penimbang (*weighting factor*) pada model prediksi numerik selanjutnya.")
+st.success(" **Target Kerja Sama:** Mengintegrasikan data kualitatif form ini menjadi komponen penimbang (*weighting factor*) pada model prediksi numerik selanjutnya.")

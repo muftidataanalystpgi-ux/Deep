@@ -1,0 +1,12 @@
+riset_performa_dashboard/
+│
+├── app.py                 # Halaman Utama (Halaman 1: Executive Performance)
+├── requirements.txt       # Daftar library Python yang dibutuhkan
+│
+├── pages/                 # Folder wajib Streamlit untuk multi-page
+│   ├── 1_Deep_Dive.py     # Halaman 2: Analisis Akar Masalah & Form Riset
+│   └── 2_Feedback_Loop.py # Halaman 3: Data Scientist Corner
+│
+└── data/                  # Folder untuk menyimpan data (opsional)
+    ├── data_omset.csv     # Data kuantitatif (Aktual vs Prediksi)
+    └── data_riset.csv     # Data kualitatif (Hasil Google Form)

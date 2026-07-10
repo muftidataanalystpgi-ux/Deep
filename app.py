@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 st.set_page_config(page_title="Executive Performance Dashboard", layout="wide")
-st.title("📊 Multi-Model Performance & Audit Mismatch")
+st.title("Multi-Model Performance & Audit Mismatch")
 st.markdown("---")
 
 # 1. Load Data dengan Pembersihan Nama Kolom
@@ -34,7 +34,7 @@ try:
     missing_cols = [c for c in [col_x, col_y, col_color] if c not in df.columns]
     
     if missing_cols:
-        st.error(f"❌ Kolom berikut tidak ditemukan di CSV Anda: {missing_cols}")
+        st.error(f"Kolom berikut tidak ditemukan di CSV Anda: {missing_cols}")
         st.info(f"Kolom yang tersedia di file Anda adalah: {list(df.columns)}")
     else:
         # --- SECTION 1: KPI Cards ---
@@ -45,7 +45,7 @@ try:
             st.metric(label="Total Prediksi Omset (RF)", value=f"{df[col_x].sum():,.0f}")
         with col3:
             total_mismatch = len(df[df[col_color] == 'Mismatch'])
-            st.metric(label="Total Cabang Mismatch (RF) 🚨", value=total_mismatch)
+            st.metric(label="Total Cabang Mismatch (RF)", value=total_mismatch)
 
         st.markdown("---")
 

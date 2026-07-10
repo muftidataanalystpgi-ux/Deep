@@ -331,29 +331,10 @@ try:
 
             st.markdown(f"#### Profil Target: **{row['Nama Cabang']}** ({row.get('Kabupaten', '-')})")
 
-            col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
-            with col_m1:
-                st.metric(label="Omzet Actual", value=f"Rp {row[col_actual]:,}")
-            with col_m2:
-                st.metric(label=f"Prediksi ({model_terpilih})", value=f"Rp {row[col_pred]:,}")
-            with col_m3:
-                st.metric(label="Premium Spot Score", value=f"{row.get('premium_spot_score', '-')}/100")
-            with col_m4:
-                st.metric(label="Klaster K-Means", value=row.get("Kuadran_Performa", "-"))
-            with col_m5:
-                skor_sdm = row.get("Sentimen_SDM_Skor", 0)
-                label_sdm = row.get("Sentimen_SDM_Label", "-")
-                if label_sdm == "Negatif":
-                    st.error(f"Sentimen SDM: {label_sdm}")
-                elif label_sdm == "Positif":
-                    st.success(f"Sentimen SDM: {label_sdm}")
-                else:
-                    st.info(f"Sentimen SDM: {label_sdm}")
             # =============================================================================
             # LEMBAR KERJA AUDIT SURVEI PER CABANG - KPI METRIC CARDS (ANTI-POTONG)
             # =============================================================================
             detail_col1, detail_col2, detail_col3, detail_col4 = st.columns([1.1, 1.1, 1.0, 0.9])
-        
             with detail_col1:
                 st.markdown(f"""
                     <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">

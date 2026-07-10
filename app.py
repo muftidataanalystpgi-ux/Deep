@@ -38,7 +38,7 @@ KATEGORI_KENDALA = {
     "Kompetitor / Persaingan": ["kompetitor", "pesaing", "diskon", "predatory", "bakar uang", "promo gencar"],
     "Akses & Parkir": ["akses", "jalan", "parkir", "macet", "banjir", "ditutup", "rusak", "proyek"],
     "SDM & Operasional": ["karyawan", "staf", "sdm", "absen", "tidak masuk", "kurang orang", "pelayanan"],
-    "Sistem & Stok/Plafon": ["sistem", "error", "down", "stok", "kosong", "plafon", "taksiran", "limit"],
+    "Sistem & Plafon": ["sistem", "error", "down", "stok", "kosong", "plafon", "taksiran", "limit"],
     "Ekonomi & Daya Beli": ["sepi", "daya beli", "ekonomi", "turun", "menurun", "pemukiman sepi", "lesu"],
     "Fisik Bangunan/Ruko": ["renovasi", "sempit", "luas ruko", "branding", "papan nama", "sinyal"],
 }

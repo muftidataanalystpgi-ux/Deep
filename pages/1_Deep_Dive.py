@@ -1,53 +1,67 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 
 st.set_page_config(page_title="Deep-Dive Analisis", layout="wide")
-st.title("🔍 Deep-Dive Lapangan & Analisis Akar Masalah")
+st.title("🔍 Deep-Dive Geografis & Audit Laporan Form Riset")
 
-# Mock Data Gabungan Model & Form Riset
-cabang_detail = {
-    'MDN001': {
-        'UMK': 'Tinggi (Rp 4.5M)', 'Penduduk': 'Padat', 'Kompetitor_Model': 1,
-        'Kendala_Form': 'Akses jalan di depan ruko ditutup total karena proyek perbaikan saluran air kota semenjak awal bulan. Konsumen kesulitan parkir.',
-        'Kompetitor_Form': '1 Kompetitor agresif melakukan predatory pricing (diskon 50%) semenjak minggu ke-2.'
-    },
-    'KNG014': {
-        'UMK': 'Sedang (Rp 3.1M)', 'Penduduk': 'Sedang', 'Kompetitor_Model': 2,
-        'Kendala_Form': 'Stok barang inti sering kosong karena keterlambatan pengiriman dari gudang pusat.',
-        'Kompetitor_Form': 'Kompetitor normal, tidak ada pergerakan agresif.'
-    }
-}
+# Dummy Load dari gabungan baris CSV Anda
+# Di dunia nyata, Anda tinggal mengambil baris cabang tertentu berdasarkan filter
+@st.cache_data
+def load_full_features():
+    return pd.DataFrame({
+        'nama_cabang': ['MDN001', 'KNG014', 'PTI001'],
+        'umk': [4500000, 3200000, 2800000],
+        'lebar_ruko': [8, 6, 7],
+        'jumlah_kompetitor': [1, 3, 2],
+        'premium_spot_score': [85, 45, 70],
+        'Jarak_Ref_KM': [0.5, 3.2, 1.8],
+        'Cabang_Terdekat_Ref': ['MDN004', 'KNG002', 'PTI003']
+    })
 
-# --- PANEL FILTER ---
-st.sidebar.header("Filter Analisis")
-pilihan_cabang = st.sidebar.selectbox("Pilih Nama Cabang:", list(cabang_detail.keys()))
+df_feat = load_full_features()
 
-st.markdown(f"### Analisis Audit untuk Cabang: **{pilihan_cabang}**")
+# --- SIDEBAR FILTER ---
+st.sidebar.header("Navigasi Cabang")
+pilihan_cabang = st.sidebar.selectbox("Pilih Cabang untuk Di-audit:", df_feat['nama_cabang'].tolist())
 
-# --- SIDE-BY-SIDE COMPARISON ---
-col_model, col_lapangan = st.columns(2)
+# Ambil data spesifik cabang yang dipilih
+cabang_data = df_feat[df_feat['nama_cabang'] == pilihan_cabang].iloc[0]
 
-with col_model:
-    st.info("🤖 **Sisi Kiri: Profil Variabel Model (Kenapa Prediksi Tinggi?)**")
-    st.write(f"- **Faktor UMK:** {cabang_detail[pilihan_cabang]['UMK']}")
-    st.write(f"- **Kepadatan Penduduk:** {cabang_detail[pilihan_cabang]['Penduduk']}")
-    st.write(f"- **Jumlah Kompetitor (Data Model):** {cabang_detail[pilihan_cabang]['Kompetitor_Model']} kompetitor terdeteksi.")
+st.markdown(f"### Audit Indikator & Feedback Lapangan: **{pilihan_cabang}**")
 
-with col_lapangan:
-    st.warning("📋 **Sisi Kanan: Realitas Form Riset (Kenapa Aktual Rendah?)**")
-    st.markdown("**Kendala Utama di Lapangan:**")
-    st.write(cabang_detail[pilihan_cabang]['Kendala_Form'])
-    st.markdown("**Dinamika Kompetitor Riil:**")
-    st.write(cabang_detail[pilihan_cabang]['Kompetitor_Form'])
+# --- KOMPARASI DUA SISI ---
+col_features, col_form = st.columns(2)
 
-# --- PARETO CHART KENDALA ---
+with col_features:
+    st.info("🤖 **Kondisi Fitur Model (Data Kuantitatif di CSV)**")
+    
+    # Kelompokkan visualisasi berdasarkan variabel Anda
+    st.markdown("#### 📍 Aspek Makro & Properti")
+    st.write(f"- **Nilai UMK daerah:** Rp {cabang_data['umk']:,}")
+    st.write(f"- **Lebar Ruko:** {cabang_data['lebar_ruko']} Meter")
+    st.write(f"- **Premium Spot Score:** {cabang_data['premium_spot_score']}/100")
+    
+    st.markdown("#### 🗺️ Aspek Spasial & Kompetisi")
+    st.write(f"- **Jumlah Kompetitor Terdekat:** {cabang_data['jumlah_kompetitor']}")
+    st.write(f"- **Cabang Referensi Terdekat:** {cabang_data['Cabang_Terdekat_Ref']}")
+    st.write(f"- **Jarak ke Cabang Referensi:** {cabang_data['Jarak_Ref_KM']} KM")
+
+with col_form:
+    st.warning("📋 **Input Konteks Kualitatif (Data Hasil Google Form)**")
+    
+    # Bagian ini membaca text input / form kualitatif yang diisi manual oleh tim cabang Anda
+    st.markdown("#### 💬 Alasan Kesenjangan / Kendala Lapangan")
+    
+    # Contoh logic penayangan dinamis berdasarkan nama_cabang
+    if pilihan_cabang == 'MDN001':
+        st.error("**Kendala Aksesibilitas:** 'Meskipun Premium Spot Score tinggi, jalanan di depan ruko sedang dibongkar untuk perbaikan drainase kota total sejak awal bulan. Parkir mobil/motor lumpuh.'")
+        st.markdown("**Catatan Kompetisi:** '1 Kompetitor melakukan promo potong admin besar-besaran untuk mengalihkan rute konsumen.'")
+    elif pilihan_cabang == 'PTI001':
+        st.error("**Kendala Operasional:** 'Stok inventaris terlambat datang dari gudang pusat regional, banyak konsumen yang membatalkan transaksi karena barang kosong.'")
+    else:
+        st.success("Belum ada kendala kritikal yang dilaporkan atau cabang berstatus Match.")
+
 st.markdown("---")
-st.subheader("Peta Kendala Nasional (Data Form Responses)")
-# Mock data aggregasi kendala
-data_kendala = pd.DataFrame({
-    'Kategori Kendala': ['Akses Jalan/Parkir', 'Agresivitas Kompetitor', 'Masalah Stok Internal', 'Daya Beli Turun'],
-    'Jumlah Cabang': [15, 12, 6, 3]
-})
-fig_pareto = px.bar(data_kendala, x='Jumlah Cabang', y='Kategori Kendala', orientation='h', color='Kategori Kendala')
-st.plotly_chart(fig_pareto, use_container_width=True)
+# Menampilkan peta sederhana jika longitude & latitude dimasukkan
+st.subheader("Lokasi Cabang Terkait")
+st.caption("Gunakan data latitude dan longitude dari CSV Anda untuk memetakan sebaran titik rawan mismatch.")

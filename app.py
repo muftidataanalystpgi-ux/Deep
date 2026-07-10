@@ -240,25 +240,6 @@ try:
                     <h3 style="margin: 0.25rem 0 0 0; font-size: 1.5rem; color: #10B981; font-weight: 700;">{pct_isi:.0f}%</h3>
                 </div>
             """, unsafe_allow_html=True)
-        
-    with tab_exec:
-        st.markdown(f"### Performa Global & Validasi Model K-Means — Basis: **{model_terpilih}**")
-
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.metric(label="Total Omset Aktual", value=f"Rp {df[col_actual].sum():,.0f}")
-        with col2:
-            st.metric(label=f"Total Prediksi Model ({model_terpilih})", value=f"Rp {df[col_pred].sum():,.0f}")
-        with col3:
-            total_mismatch = len(df[df[col_mismatch] == 'Mismatch'])
-            st.metric(label=f"Cabang Mismatch ({model_terpilih}) ", value=total_mismatch)
-        with col4:
-            if COL_SARAN in df.columns:
-                terisi = df[COL_SARAN].notna() & (df[COL_SARAN].astype(str).str.strip() != "-")
-                pct_isi = terisi.mean() * 100
-                st.metric(label="Kelengkapan Form Riset ", value=f"{pct_isi:.0f}%")
-            else:
-                st.metric(label="Kelengkapan Form Riset ", value="N/A")
 
         st.markdown("---")
 

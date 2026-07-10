@@ -158,7 +158,7 @@ try:
         "GWR": ("Prediksi_Omzet_GWR", "Mismatch_GWR"),
     }
 
-    st.title("📊 Platform Audit & Performa Cabang")
+    st.title("Platform Audit & Performa Cabang")
     st.caption("Aplikasi Analisis Data Terpadu — Riset Lapangan & Prediksi Multi-Model 2026")
 
     # Pilihan model berlaku global untuk seluruh dashboard
@@ -206,10 +206,10 @@ try:
     # NAVIGATION TABS
     # =========================================================================
     tab_exec, tab_deep, tab_naratif, tab_model = st.tabs([
-        "📈 Ringkasan Eksekutif",
-        "🔍 Investigasi Deep-Dive Cabang",
-        "🗣️ Analisis Naratif & Sentimen",
-        "🧭 Feature Validity & Rekomendasi Model",
+        "Ringkasan Eksekutif",
+        "Investigasi Deep-Dive Cabang",
+        "Analisis Naratif & Sentimen",
+        "Feature Validity & Rekomendasi Model",
     ])
 
     # =========================================================================
@@ -230,9 +230,9 @@ try:
             if COL_SARAN in df.columns:
                 terisi = df[COL_SARAN].notna() & (df[COL_SARAN].astype(str).str.strip() != "-")
                 pct_isi = terisi.mean() * 100
-                st.metric(label="Kelengkapan Form Riset ✅", value=f"{pct_isi:.0f}%")
+                st.metric(label="Kelengkapan Form Riset ", value=f"{pct_isi:.0f}%")
             else:
-                st.metric(label="Kelengkapan Form Riset ✅", value="N/A")
+                st.metric(label="Kelengkapan Form Riset ", value="N/A")
 
         st.markdown("---")
 
@@ -311,7 +311,7 @@ try:
         if pilihan_cabang:
             row = df[df['Nama Cabang'] == pilihan_cabang].iloc[0]
 
-            st.markdown(f"#### 🏢 Profil Target: **{row['Nama Cabang']}** ({row.get('Kabupaten', '-')})")
+            st.markdown(f"####  Profil Target: **{row['Nama Cabang']}** ({row.get('Kabupaten', '-')})")
 
             col_m1, col_m2, col_m3, col_m4, col_m5 = st.columns(5)
             with col_m1:
@@ -340,10 +340,10 @@ try:
             # SISI KIRI: INDIKATOR MODEL & DATA DEMOGRAFI
             # -----------------------------------------------------------
             with col_left:
-                st.info("🤖 **Kondisi Fitur Model (Sisi Kuantitatif & Kewilayahan)**")
+                st.info(" **Kondisi Fitur Model (Sisi Kuantitatif & Kewilayahan)**")
 
                 with st.container(border=True):
-                    st.markdown("##### 📊 Demografi & Makro Wilayah")
+                    st.markdown("#####  Demografi & Makro Wilayah")
                     st.write(f"- **Kabupaten:** {row.get('Kabupaten', '-')}")
                     st.write(f"- **Kategori Wilayah (Model):** {row.get('kategori_wilayah_mapped', row.get('kategori_wilayah', '-'))}")
                     st.write(f"- **Tipe Jalan (Model):** {row.get('jalan_mapped', row.get('tipe_jalan', '-'))}")
@@ -354,7 +354,7 @@ try:
                     st.write(f"- **UMK Terpeta:** Rp {row.get('umk', 0):,}")
 
                 with st.container(border=True):
-                    st.markdown("##### 🛒 Indikator Spasial & Komersial")
+                    st.markdown("#####  Indikator Spasial & Komersial")
                     st.write(f"- **Lebar Ruko:** {row.get('lebar_ruko', '-')} Meter")
                     st.write(f"- **Commercial Hub Index:** {row.get('commercial_hub_index', '-')}")
                     st.write(f"- **Fasilitas Belanja:** {row.get('jumlah_fasilitas_belanja', '-')}")
@@ -366,7 +366,7 @@ try:
                     st.write(f"- **Kepadatan Kompetitor/Populasi:** {row.get('comp_per_pop', '-')}")
 
                 with st.container(border=True):
-                    st.markdown("##### 📐 Evaluasi Multi-Model (Prediction Gap)")
+                    st.markdown("#####  Evaluasi Multi-Model (Prediction Gap)")
                     st.write(f"- **Prediksi OLS:** Rp {row.get('Prediksi_Omzet_OLS', 0):,}")
                     st.write(f"- **Prediksi RF:** Rp {row.get('Prediksi_Omzet_RF', 0):,}")
                     st.write(f"- **Prediksi GWR:** Rp {row.get('Prediksi_Omzet_GWR', 0):,}")
@@ -377,9 +377,9 @@ try:
             # SISI KANAN: JAWABAN REAL LAPANGAN
             # -----------------------------------------------------------
             with col_right:
-                st.warning("📋 **Realitas Riil Lapangan (Hasil Form Riset Lapangan)**")
+                st.warning(" **Realitas Riil Lapangan (Hasil Form Riset Lapangan)**")
 
-                with st.expander("👥 1. SDM & Operasional Cabang", expanded=True):
+                with st.expander(" 1. SDM & Operasional Cabang", expanded=True):
                     st.write(f"**Lama Beroperasi:** {row.get('Sudah beroperasi berapa lama cabang anda?', '-')}")
                     st.write(f"**Kategori Class Cabang:** {row.get('Kategori Class Cabang di lokasi anda', '-')}")
                     st.write(f"**Nama Kanit:** {row.get('Nama Kanit Cabang', '-')} ({row.get('Jabatan Karyawan', '-')})")
@@ -391,7 +391,7 @@ try:
                     st.write(f"**Waktu Transaksi:** {row.get('Rata-rata waktu satu kali transaksi (menit) ?', '-')} Menit")
                     st.write(f"**Hambatan Taksiran:** {row.get('Kendala utama yang memperlambat proses taksiran ?', '-')}")
 
-                with st.expander("💰 2. Produk, Plafon & Kebijakan Taksiran"):
+                with st.expander(" 2. Produk, Plafon & Kebijakan Taksiran"):
                     st.write(f"**Gadai Emas:** {row.get('Gadai Emas', '-')}")
                     st.write(f"**Gadai Elektronik:** {row.get('Gadai Elektronik', '-')}")
                     st.write(f"**Gadai BPKB:** {row.get('Gadai BPKB', '-')}")
@@ -401,7 +401,7 @@ try:
                     st.write(f"**Alasan Penyesuaian Plafon:** {row.get('Jika butuh. Alasan utama kebutuhan penyesuaian plafon taksiran tersebut. Jika tidak butuh isi dengan \"Tidak\" atau \" - \"', '-')}")
                     st.error(f"**Barang Paling Sering Ditolak & Alasan:** {row.get('Jenis barang yang paling sering ditolak dan alasannya?', '-')}")
 
-                with st.expander("📍 3. Aksesibilitas, Fisik Ruko & Lingkungan"):
+                with st.expander(" 3. Aksesibilitas, Fisik Ruko & Lingkungan"):
                     st.write(f"**Keterlihatan dari Jalan:** {row.get('Seberapa mudah kantor cabang terlihat dari jalan raya?', '-')}")
                     st.write(f"**Arah Hadap Bangunan:** {row.get('Arah hadap bangunan cabang', '-')}")
                     st.write(f"**Kondisi Papan Nama/Branding:** {row.get('Kondisi papan nama / branding cabang', '-')}")
@@ -412,16 +412,16 @@ try:
                     st.write(f"**Kecukupan Luas Ruko:** {row.get('Apakah luas ruko atau cabang terasa cukup untuk operasional dan jumlah nasabah harian?', '-')}")
                     st.write(f"**Kendala Fisik / Rencana Renovasi:** {row.get('Apakah ada kendala fisik bangunan atau rencana renovasi yang ada?', '-')}")
 
-                with st.expander("⚔️ 4. Dinamika Kompetisi Lapangan"):
+                with st.expander(" 4. Dinamika Kompetisi Lapangan"):
                     st.write(f"**Jumlah Kompetitor (Radius 500m):** {row.get('Berapa jumlah kompetitor dalam radius 500 m ?', '-')}")
                     st.write(f"**Nama-Nama Kompetitor:** {row.get('Jika ada kompetitor, sebutkan namanya', '-')}")
                     st.write(f"**Dampak Persaingan Terberat:** {row.get('Kompetitor yang paling dirasakan dampak persaingannya? (pegadaian swasta, koperasi simpan pinjam, bpr, rentenir, dll)', '-')}")
-                    st.error(f"**🚨 Kompetitor Baru (3 Bulan Terakhir):** {row.get('Kompetitor baru yang muncul belakangan ini atau akhir-akhir ini (3 bulan terakhir). Nama & lokasi?', '-')}")
+                    st.error(f"** Kompetitor Baru (3 Bulan Terakhir):** {row.get('Kompetitor baru yang muncul belakangan ini atau akhir-akhir ini (3 bulan terakhir). Nama & lokasi?', '-')}")
                     st.write(f"**Alasan Nasabah Pilih Kompetitor:** {row.get('Alasan utama nasabah memilih kompetitor dibanding kita (jika ada)', '-')}")
                     st.write(f"**Persepsi Biaya/Bunga vs Kompetitor:** {row.get('Persepsi nasabah terhadap biaya/bunga kita dibanding kompetitor:', '-')}")
                     st.write(f"**Penolakan Nasabah yang Sering Terjadi:** {row.get('Penolakan nasabah yang sering terjadi dan alasan utamanya?', '-')}")
 
-                with st.expander("📈 5. Karakteristik & Pola Musiman Nasabah"):
+                with st.expander(" 5. Karakteristik & Pola Musiman Nasabah"):
                     st.write(f"**Tipe Nasabah Dominan:** {row.get('Tipe nasabah yang paling dominan?', '-')}")
                     st.write(f"**Signifikansi Nasabah Loyal:** {row.get('Apakah ada nasabah loyal / repeat customer yang signifikan? Jika ada, sekitar berapa?', '-')}")
                     st.write(f"**Asal Radius Area Nasabah:** {row.get('Nasabah kebanyakan berasal dari radius / area mana saja?', '-')}")
@@ -433,12 +433,12 @@ try:
                     st.write(f"**Mata Pencaharian Dominan:** {row.get('Mata pencaharian dominan warga sekitar cabang', '-')}")
 
             st.markdown("---")
-            st.subheader("💡 Narasi Kualitatif & Strategi Optimalisasi Bisnis Cabang 2026")
+            st.subheader(" Narasi Kualitatif & Strategi Optimalisasi Bisnis Cabang 2026")
 
             col_b1, col_b2 = st.columns(2)
             with col_b1:
                 with st.container(border=True):
-                    st.markdown("##### 🚀 Program Sukses & Potensi Wilayah")
+                    st.markdown("#####  Program Sukses & Potensi Wilayah")
                     st.write(f"**Program/Promosi Sukses Lampau:** {row.get('Program atau promosi yang pernah sangat berhasil & alasannya?', '-')}")
                     st.write(f"**Tingkat Ketergarapan Potensi Wilayah:** {row.get('Potensi wilayah sekitar cabang sudah tergarap maksimal atau masih belum?', '-')}")
                     st.write(f"**Fasilitas yang Paling Sering Diminta Nasabah:** {row.get('Keluhan atau fasilitas yang paling sering diminta nasabah (misal: dispenser, kursi tambahan)', '-')}")
@@ -446,7 +446,7 @@ try:
 
             with col_b2:
                 with st.container(border=True):
-                    st.markdown("##### 🚨 Saran, Kendala Kritis & Rekomendasi Utama")
+                    st.markdown("#####  Saran, Kendala Kritis & Rekomendasi Utama")
                     label_saran = row.get("Sentimen_Saran_Label", "-")
                     st.caption(f"Sentimen Terdeteksi: **{label_saran}**")
                     st.warning(f"\"{row.get(COL_SARAN, '-')}\"")
@@ -455,7 +455,7 @@ try:
     # TAB 3: ANALISIS NARATIF & SENTIMEN
     # =========================================================================
     with tab_naratif:
-        st.markdown("### 🗣️ Text Mining, Pareto Kendala & Sentiment Analysis")
+        st.markdown("###  Text Mining, Pareto Kendala & Sentiment Analysis")
 
         col_filt1, col_filt2 = st.columns(2)
         with col_filt1:
@@ -496,7 +496,7 @@ try:
                 with col_p2:
                     st.dataframe(df_pareto, use_container_width=True, hide_index=True)
 
-                st.markdown("##### 🔍 Drill-Down: Cabang per Kategori Kendala")
+                st.markdown("#####  Drill-Down: Cabang per Kategori Kendala")
                 kategori_pilih = st.selectbox("Pilih kategori untuk melihat detail narasi cabang:", df_pareto["Kategori"].tolist())
                 mask_kategori = df_naratif["Kategori_Kendala"].apply(lambda lst: kategori_pilih in lst)
                 kolom_tampil = ["Nama Cabang", "Kabupaten"] + KOLOM_NARATIF_KENDALA
@@ -505,7 +505,7 @@ try:
             else:
                 st.info("Belum ada kendala yang terdeteksi dari narasi pada filter saat ini.")
 
-            st.markdown("##### ☁️ Kata Paling Sering Muncul di Narasi Lapangan")
+            st.markdown("#####  Kata Paling Sering Muncul di Narasi Lapangan")
             top_words = top_kata(
                 pd.concat([df_naratif[c] for c in KOLOM_NARATIF_KENDALA if c in df_naratif.columns]),
                 n=20
@@ -582,7 +582,7 @@ try:
     # TAB 4: FEATURE VALIDITY & REKOMENDASI MODEL
     # =========================================================================
     with tab_model:
-        st.markdown("### 🧭 Feature Validity Matrix & Rekomendasi Perbaikan Model")
+        st.markdown("###  Feature Validity Matrix & Rekomendasi Perbaikan Model")
 
         df_mismatch = df[df[col_mismatch] == 'Mismatch'].copy()
 
@@ -602,7 +602,7 @@ try:
             if not df_validity.empty:
                 top_faktor = df_validity.iloc[0]
                 st.success(
-                    f"💡 **Insight otomatis:** {top_faktor['% dari Total Mismatch']:.0f}% cabang mismatch "
+                    f" **Insight :** {top_faktor['% dari Total Mismatch']:.0f}% cabang mismatch "
                     f"terindikasi terkait faktor **'{top_faktor['Kategori Kendala']}'**. "
                     f"Rekomendasi: pertimbangkan menambahkan fitur kuantitatif terkait faktor ini "
                     f"(misal skor/indikator numerik dari Form Riset) ke model prediksi berikutnya."

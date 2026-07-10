@@ -3,66 +3,90 @@ import pandas as pd
 import plotly.express as px
 
 st.set_page_config(page_title="Executive Performance Dashboard", layout="wide")
-st.title("Multi-Model Performance & Audit Mismatch")
+st.title("📊 Multi-Model Performance & Audit Mismatch")
 st.markdown("---")
 
-# 1. Load Data Riil (Pastikan file diletakkan di folder data/data_omset.csv)
+# 1. Load Data dengan Pembersihan Nama Kolom
 @st.cache_data
 def load_data():
-    # Ganti dengan path riil Anda, contoh: pd.read_csv('data/data_omset.csv')
-    # Di bawah ini adalah mock dataframe dengan struktur kolom persis seperti milik Anda
-    mock_data = pd.DataFrame({
-        'nama_cabang': ['MDN001', 'KNG014', 'PTI001', 'MGW007', 'UNR006'],
-        'kategori_wilayah': ['Ritel Padat', 'Suburban', 'Sentra Dagang', 'Ritel Padat', 'Suburban'],
-        'Omzet_Actual': [120, 90, 85, 210, 140],
-        'Prediksi_Omzet_RF': [200, 95, 130, 215, 110],
-        'Prediksi_Omzet_GWR': [180, 92, 125, 230, 115],
-        'Mismatch_RF': ['Mismatch', 'Match', 'Mismatch', 'Match', 'Match'],
-        'commercial_hub_index': [0.85, 0.42, 0.61, 0.92, 0.55]
-    })
-    return mock_data
+    # Ganti dengan path file CSV asli Anda
+    df = pd.read_csv('data/data_omset.csv') 
+    
+    # Kunci Keamanan 1: Hilangkan spasi tak terlihat di nama kolom
+    df.columns = df.columns.str.strip()
+    
+    # Kunci Keamanan 2: Isi nilai kosong pada kolom Mismatch agar Plotly tidak error
+    if 'Mismatch_RF' in df.columns:
+        df['Mismatch_RF'] = df['Mismatch_RF'].fillna('Unknown')
+        
+    return df
 
-df = load_data()
+try:
+    df = load_data()
 
-# --- SECTION 1: KPI Cards (Fokus ke Model Random Forest sebagai contoh) ---
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.metric(label="Total Actual Omset", value=f"{df['Omzet_Actual'].sum()}M")
-with col2:
-    st.metric(label="Total Prediksi Omset (RF)", value=f"{df['Prediksi_Omzet_RF'].sum()}M")
-with col3:
-    total_mismatch_rf = len(df[df['Mismatch_RF'] == 'Mismatch'])
-    st.metric(label="Total Cabang Mismatch (RF) 🚨", value=total_mismatch_rf)
-with col4:
-    avg_hub_index = round(df['commercial_hub_index'].mean(), 2)
-    st.metric(label="Rata-rata Hub Index", value=avg_hub_index)
+    # --- SINKRONISASI NAMA KOLOM ---
+    # Definisikan nama kolom sesuai data Anda (pastikan huruf besar/kecilnya sama)
+    col_x = "Prediksi_Omset_RF"  # Sesuai list Anda sebelumnya
+    col_y = "Omzet_Actual"       # Sesuai list Anda sebelumnya
+    col_color = "Mismatch_RF"
 
-st.markdown("---")
+    # Validasi apakah kolom benar-benar ada di CSV
+    missing_cols = [c for c in [col_x, col_y, col_color] if c not in df.columns]
+    
+    if missing_cols:
+        st.error(f"❌ Kolom berikut tidak ditemukan di CSV Anda: {missing_cols}")
+        st.info(f"Kolom yang tersedia di file Anda adalah: {list(df.columns)}")
+    else:
+        # --- SECTION 1: KPI Cards ---
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric(label="Total Actual Omset", value=f"{df[col_y].sum():,.0f}")
+        with col2:
+            st.metric(label="Total Prediksi Omset (RF)", value=f"{df[col_x].sum():,.0f}")
+        with col3:
+            total_mismatch = len(df[df[col_color] == 'Mismatch'])
+            st.metric(label="Total Cabang Mismatch (RF) 🚨", value=total_mismatch)
 
-# --- SECTION 2: Visualisasi Komparasi Model ---
-col_left, col_right = st.columns(2)
+        st.markdown("---")
 
-with col_left:
-    st.subheader("Scatter Plot: Aktual vs Prediksi Random Forest")
-    fig_scatter = px.scatter(df, x="Prediksi_Omset_RF", y="Omzet_Actual", 
-                             color="Mismatch_RF", hover_name="nama_cabang", text="nama_cabang",
-                             color_discrete_map={'Mismatch': '#EF553B', 'Match': '#636EFA'},
-                             labels={"Prediksi_Omset_RF": "Prediksi Random Forest", "Omzet_Actual": "Aktual"})
-    fig_scatter.add_shape(type="line", x0=0, y0=0, x1=250, y1=250, line=dict(color="Gray", dash="dash"))
-    st.plotly_chart(fig_scatter, use_container_width=True)
+        # --- SECTION 2: Visualisasi ---
+        col_left, col_right = st.columns(2)
 
-with col_right:
-    st.subheader("Distribusi Cabang Mismatch per Kategori Wilayah")
-    fig_bar = px.histogram(df, x="kategori_wilayah", color="Mismatch_RF", barmode="group",
-                           color_discrete_map={'Mismatch': '#EF553B', 'Match': '#636EFA'})
-    st.plotly_chart(fig_bar, use_container_width=True)
+        with col_left:
+            st.subheader("Scatter Plot: Aktual vs Prediksi Random Forest")
+            
+            # Pengaman warna map jika ada data selain Match/Mismatch
+            color_map = {'Mismatch': '#EF553B', 'Match': '#636EFA', 'Unknown': '#A3A3A3'}
+            
+            fig_scatter = px.scatter(
+                df, 
+                x=col_x, 
+                y=col_y, 
+                color=col_color, 
+                hover_name="nama_cabang", 
+                text="nama_cabang",
+                color_discrete_map=color_map,
+                labels={col_x: "Prediksi Random Forest", col_y: "Aktual"}
+            )
+            
+            # Buat garis diagonal dinamis mengikuti nilai maksimum data
+            max_val = max(df[col_x].max(), df[col_y].max())
+            fig_scatter.add_shape(type="line", x0=0, y0=0, x1=max_val, y1=max_val, line=dict(color="Gray", dash="dash"))
+            
+            st.plotly_chart(fig_scatter, use_container_width=True)
 
-# --- SECTION 3: Data Table Filtered by Mismatch ---
-st.markdown("---")
-st.subheader("Daftar Cabang yang Mengalami Mismatch (Prediksi vs Realitas Lapangan)")
-show_mismatch_only = st.checkbox("Tampilkan Hanya Cabang Mismatch")
+        with col_right:
+            st.subheader("Distribusi Cabang Mismatch per Kategori Wilayah")
+            if 'kategori_wilayah' in df.columns:
+                fig_bar = px.histogram(df, x="kategori_wilayah", color=col_color, barmode="group", color_discrete_map=color_map)
+                st.plotly_chart(fig_bar, use_container_width=True)
+            else:
+                st.caption("Kolom 'kategori_wilayah' tidak ditemukan untuk grafik batangan.")
 
-if show_mismatch_only:
-    st.dataframe(df[df['Mismatch_RF'] == 'Mismatch'], use_container_width=True)
-else:
-    st.dataframe(df, use_container_width=True)
+        # --- SECTION 3: Tabel ---
+        st.markdown("---")
+        st.subheader("Daftar Detail Performa Cabang")
+        st.dataframe(df, use_container_width=True)
+
+except Exception as e:
+    st.error(f"Gagal membaca file data. Pastikan file berada di folder yang benar. Error: {e}")

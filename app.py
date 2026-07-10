@@ -334,7 +334,7 @@ try:
             # =============================================================================
             # LEMBAR KERJA AUDIT SURVEI PER CABANG - KPI METRIC CARDS (ANTI-POTONG)
             # =============================================================================
-            detail_col1, detail_col2, detail_col3, detail_col4, detail_col5 = st.columns([1.1, 1.1, 1.0, 0.9])
+            detail_col1, detail_col2, detail_col3, detail_col4, detail_col5 = st.columns([1.1, 1.1, 1.0, 0.9,1.0])
             with detail_col1:
                 st.markdown(f"""
                     <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
@@ -429,7 +429,7 @@ try:
                     st.write(f"- **Prediksi GWR:** Rp {row.get('Prediksi_Omzet_GWR', 0):,}")
 
             with col_right:
-                st.warning(" **Realitas Riil Lapangan (Hasil Form Riset Lapangan)**")
+                st.warning(" **Realitas Riil Cabang (Hasil Form Riset Survei Cabang)**")
                 with st.expander("1. SDM & Operasional Cabang", expanded=True):
                     st.write(f"**Lama Beroperasi:** {row.get('Sudah beroperasi berapa lama cabang anda?', '-')}")
                     st.write(f"**Kategori Class Cabang:** {row.get('Kategori Class Cabang di lokasi anda', '-')}")

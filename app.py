@@ -195,9 +195,52 @@ try:
         "Feature Validity & Rekomendasi Model",
     ])
 
-    # =========================================================================
+    # =============================================================================
     # TAB 1: RINGKASAN EKSEKUTIF
-    # =========================================================================
+    # =============================================================================
+    with tab_exec:
+        st.markdown(f"### Performa Global & Validasi Model K-Means – Basis: **{model_terpilih}**")
+        
+        # 🌟 GANTI BARIS 204 - 216 DENGAN BLOK KODE BARU INI 🌟
+        m_col1, m_col2, m_col3, m_col4 = st.columns([1.1, 1.1, 0.9, 0.9])
+    
+        with m_col1:
+            st.markdown(f"""
+                <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Total Omset Aktual</span>
+                    <h3 style="margin: 0.25rem 0 0 0; font-size: 1.35rem; color: #0F172A; font-weight: 700; white-space: nowrap;">Rp {df[col_actual].sum():,.0f}</h3>
+                </div>
+            """, unsafe_allow_html=True)
+    
+        with m_col2:
+            st.markdown(f"""
+                <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Total Prediksi Model ({model_terpilih})</span>
+                    <h3 style="margin: 0.25rem 0 0 0; font-size: 1.35rem; color: #4F46E5; font-weight: 700; white-space: nowrap;">Rp {df[col_pred].sum():,.0f}</h3>
+                </div>
+            """, unsafe_allow_html=True)
+    
+        with m_col3:
+            total_mismatch = len(df[df[col_mismatch] == 'Mismatch'])
+            st.markdown(f"""
+                <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Cabang Mismatch ({model_terpilih})</span>
+                    <h3 style="margin: 0.25rem 0 0 0; font-size: 1.5rem; color: #EF4444; font-weight: 700;">{total_mismatch} <span style="font-size: 0.85rem; color: #94A3B8; font-weight: normal;">Cabang</span></h3>
+                </div>
+            """, unsafe_allow_html=True)
+    
+        with m_col4:
+            pct_isi = 0
+            if COL_SARAN in df.columns:
+                terisi = df[COL_SARAN].notna() & (df[COL_SARAN].astype(str).str.strip() != "-")
+                pct_isi = terisi.mean() * 100
+            st.markdown(f"""
+                <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Kelengkapan Form Riset</span>
+                    <h3 style="margin: 0.25rem 0 0 0; font-size: 1.5rem; color: #10B981; font-weight: 700;">{pct_isi:.0f}%</h3>
+                </div>
+            """, unsafe_allow_html=True)
+        
     with tab_exec:
         st.markdown(f"### Performa Global & Validasi Model K-Means — Basis: **{model_terpilih}**")
 

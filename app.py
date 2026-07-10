@@ -349,7 +349,68 @@ try:
                     st.success(f"Sentimen SDM: {label_sdm}")
                 else:
                     st.info(f"Sentimen SDM: {label_sdm}")
-
+            # =============================================================================
+            # LEMBAR KERJA AUDIT SURVEI PER CABANG - KPI METRIC CARDS (ANTI-POTONG)
+            # =============================================================================
+            detail_col1, detail_col2, detail_col3, detail_col4 = st.columns([1.1, 1.1, 1.0, 0.9])
+        
+            with detail_col1:
+                st.markdown(f"""
+                    <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Omzet Actual</span>
+                        <h3 style="margin: 0.25rem 0 0 0; font-size: 1.35rem; color: #0F172A; font-weight: 700; white-space: nowrap;">Rp {row[col_actual]:,.0f}</h3>
+                    </div>
+                """, unsafe_allow_html=True)
+        
+            with detail_col2:
+                st.markdown(f"""
+                    <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Prediksi Model ({model_terpilih})</span>
+                        <h3 style="margin: 0.25rem 0 0 0; font-size: 1.35rem; color: #4F46E5; font-weight: 700; white-space: nowrap;">Rp {row[col_pred]:,.0f}</h3>
+                    </div>
+                """, unsafe_allow_html=True)
+        
+            with detail_col3:
+                premium_score = row['Premium Spot Score'] if 'Premium Spot Score' in df.columns else 0
+                st.markdown(f"""
+                    <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Premium Spot Score</span>
+                        <h3 style="margin: 0.25rem 0 0 0; font-size: 1.35rem; color: #F59E0B; font-weight: 700;">{premium_score} <span style="font-size: 0.85rem; color: #94A3B8; font-weight: normal;">/ 100</span></h3>
+                    </div>
+                """, unsafe_allow_html=True)
+        
+            with detail_col4:
+                kuadran_label = row['Kuadran_Performa'] if 'Kuadran_Performa' in df.columns else "N/A"
+                color_map = {'On-Track': '#2ecc71', 'Over-Predicted': '#e74c3c', 'Under-Predicted': '#3498db', 'Under-Performing': '#95a5a6'}
+                text_color = color_map.get(kuadran_label, '#64748B')
+        
+                st.markdown(f"""
+                    <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Klaster K-Means</span>
+                        <h3 style="margin: 0.25rem 0 0 0; font-size: 1.15rem; color: {text_color}; font-weight: 700; white-space: nowrap;">{kuadran_label}</h3>
+                    </div>
+                """, unsafe_allow_html=True)
+            with col_m5:
+                skor_sdm = row.get("Sentimen_SDM_Skor", 0)
+                label_sdm = row.get("Sentimen_SDM_Label", "-")
+                
+                # Penentuan warna tema berdasarkan label sentimen
+                if label_sdm == "Negatif":
+                    bg_color, border_color, text_color = "#FEF2F2", "#FCA5A5", "#EF4444" # Merah
+                elif label_sdm == "Positif":
+                    bg_color, border_color, text_color = "#ECFDF5", "#A7F3D0", "#10B981" # Hijau
+                else:
+                    bg_color, border_color, text_color = "#F0F9FF", "#BAE6FD", "#0284C7" # Biru (Netral)
+        
+                st.markdown(f"""
+                    <div style="background: {bg_color}; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid {border_color}; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                        <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Sentimen & Skor SDM</span>
+                        <h3 style="margin: 0.25rem 0 0 0; font-size: 1.2rem; color: {text_color}; font-weight: 700; white-space: nowrap;">
+                            {label_sdm} <span style="font-size: 0.9rem; color: #64748B; font-weight: normal;">({skor_sdm:.2f})</span>
+                        </h3>
+                    </div>
+                """, unsafe_allow_html=True)
+           
             st.markdown("---")
             col_left, col_right = st.columns(2)
 

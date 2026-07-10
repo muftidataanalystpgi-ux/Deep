@@ -334,7 +334,7 @@ try:
             # =============================================================================
             # LEMBAR KERJA AUDIT SURVEI PER CABANG - KPI METRIC CARDS (ANTI-POTONG)
             # =============================================================================
-            detail_col1, detail_col2, detail_col3, detail_col4, col_m5 = st.columns([1.1, 1.1, 1.0, 0.9])
+            detail_col1, detail_col2, detail_col3, detail_col4, detail_col5 = st.columns([1.1, 1.1, 1.0, 0.9])
             with detail_col1:
                 st.markdown(f"""
                     <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
@@ -371,7 +371,7 @@ try:
                         <h3 style="margin: 0.25rem 0 0 0; font-size: 1.15rem; color: {text_color}; font-weight: 700; white-space: nowrap;">{kuadran_label}</h3>
                     </div>
                 """, unsafe_allow_html=True)
-            with col_m5:
+            with detail_col5:
                 skor_sdm = row.get("Sentimen_SDM_Skor", 0)
                 label_sdm = row.get("Sentimen_SDM_Label", "-")
                 

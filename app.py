@@ -5,7 +5,7 @@ import plotly.express as px
 # Konfigurasi Halaman
 st.set_page_config(page_title="Executive Performance Dashboard", layout="wide")
 
-st.title("📊 Executive Performance & Model Audit")
+st.title("Executive Performance & Model Audit")
 st.markdown("---")
 
 # Mock Data (Nanti diganti dengan load data_omset.csv Anda)

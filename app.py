@@ -337,7 +337,13 @@ if check_password():
             if filter_kuadran != "Semua Klaster":
                 df_filtered = df_filtered[df_filtered["Kuadran_Performa"] == filter_kuadran]
 
-            list_cabang = df_filtered['Nama Cabang'].tolist()
+            # Proteksi string 'nan' atau nilai kosong agar tidak masuk list seleksi
+            if 'Nama Cabang' in df_filtered.columns:
+                df_filtered = df_filtered.dropna(subset=['Nama Cabang'])
+                df_filtered = df_filtered[df_filtered['Nama Cabang'].astype(str).str.lower() != 'nan']
+                list_cabang = df_filtered['Nama Cabang'].tolist()
+            else:
+                list_cabang = []
 
             with col_f3:
                 if not list_cabang:
@@ -347,141 +353,147 @@ if check_password():
                     pilihan_cabang = st.selectbox("Pilih Target Cabang untuk Di-audit:", list_cabang)
 
             if pilihan_cabang:
-                row = df[df['Nama Cabang'] == pilihan_cabang].iloc[0]
+                # Proteksi pengecekan ketersediaan baris sebelum mengambil elemen ke-0 (.iloc[0])
+                matched_rows = df[df['Nama Cabang'] == pilihan_cabang]
+                
+                if not matched_rows.empty:
+                    row = matched_rows.iloc[0]
 
-                st.markdown(f"#### Profil Target: **{row['Nama Cabang']}** ({row.get('Kabupaten', '-')})")
+                    st.markdown(f"#### Profil Target: **{row['Nama Cabang']}** ({row.get('Kabupaten', '-')})")
 
-                detail_col1, detail_col2, detail_col3, detail_col4, detail_col5 = st.columns([1.1, 1.1, 1.0, 0.9, 1.0])
-                with detail_col1:
-                    st.markdown(f"""
-                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Omzet Actual</span>
-                            <h3 style="margin: 0.25rem 0 0 0; font-size: 1.35rem; color: #0F172A; font-weight: 700; white-space: nowrap;">Rp {row[col_actual]:,.0f}</h3>
-                        </div>
-                    """, unsafe_allow_html=True)
-            
-                with detail_col2:
-                    st.markdown(f"""
-                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Prediksi Model ({model_terpilih})</span>
-                            <h3 style="margin: 0.25rem 0 0 0; font-size: 1.35rem; color: #4F46E5; font-weight: 700; white-space: nowrap;">Rp {row[col_pred]:,.0f}</h3>
-                        </div>
-                    """, unsafe_allow_html=True)
-            
-                with detail_col3:
-                    premium_score = row['Premium Spot Score'] if 'Premium Spot Score' in df.columns else 0
-                    st.markdown(f"""
-                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Premium Spot Score</span>
-                            <h3 style="margin: 0.25rem 0 0 0; font-size: 1.35rem; color: #F59E0B; font-weight: 700;">{premium_score} <span style="font-size: 0.85rem; color: #94A3B8; font-weight: normal;">/ 100</span></h3>
-                        </div>
-                    """, unsafe_allow_html=True)
-            
-                with detail_col4:
-                    kuadran_label = row['Kuadran_Performa'] if 'Kuadran_Performa' in df.columns else "N/A"
-                    color_map = {'On-Track': '#2ecc71', 'Over-Predicted': '#e74c3c', 'Under-Predicted': '#3498db', 'Under-Performing': '#95a5a6'}
-                    text_color = color_map.get(kuadran_label, '#64748B')
-            
-                    st.markdown(f"""
-                        <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Kuadran Performa</span>
-                            <h3 style="margin: 0.25rem 0 0 0; font-size: 1.15rem; color: {text_color}; font-weight: 700; white-space: nowrap;">{kuadran_label}</h3>
-                        </div>
-                    """, unsafe_allow_html=True)
-                with detail_col5:
-                    skor_sdm = row.get("Sentimen_SDM_Skor", 0)
-                    label_sdm = row.get("Sentimen_SDM_Label", "-")
-                    
-                    if label_sdm == "Negatif":
-                        bg_color, border_color, text_color = "#FEF2F2", "#FCA5A5", "#EF4444"
-                    elif label_sdm == "Positif":
-                        bg_color, border_color, text_color = "#ECFDF5", "#A7F3D0", "#10B981"
-                    else:
-                        bg_color, border_color, text_color = "#F0F9FF", "#BAE6FD", "#0284C7"
-            
-                    st.markdown(f"""
-                        <div style="background: {bg_color}; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid {border_color}; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Sentimen & Skor SDM</span>
-                            <h3 style="margin: 0.25rem 0 0 0; font-size: 1.2rem; color: {text_color}; font-weight: 700; white-space: nowrap;">
-                                {label_sdm} <span style="font-size: 0.9rem; color: #64748B; font-weight: normal;">({skor_sdm:.2f})</span>
-                            </h3>
-                        </div>
-                    """, unsafe_allow_html=True)
-               
-                st.markdown("---")
-                col_left, col_right = st.columns(2)
+                    detail_col1, detail_col2, detail_col3, detail_col4, detail_col5 = st.columns([1.1, 1.1, 1.0, 0.9, 1.0])
+                    with detail_col1:
+                        st.markdown(f"""
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Omzet Actual</span>
+                                <h3 style="margin: 0.25rem 0 0 0; font-size: 1.35rem; color: #0F172A; font-weight: 700; white-space: nowrap;">Rp {row[col_actual]:,.0f}</h3>
+                            </div>
+                        """, unsafe_allow_html=True)
+                
+                    with detail_col2:
+                        st.markdown(f"""
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Prediksi Model ({model_terpilih})</span>
+                                <h3 style="margin: 0.25rem 0 0 0; font-size: 1.35rem; color: #4F46E5; font-weight: 700; white-space: nowrap;">Rp {row[col_pred]:,.0f}</h3>
+                            </div>
+                        """, unsafe_allow_html=True)
+                
+                    with detail_col3:
+                        premium_score = row['Premium Spot Score'] if 'Premium Spot Score' in df.columns else 0
+                        st.markdown(f"""
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Premium Spot Score</span>
+                                <h3 style="margin: 0.25rem 0 0 0; font-size: 1.35rem; color: #F59E0B; font-weight: 700;">{premium_score} <span style="font-size: 0.85rem; color: #94A3B8; font-weight: normal;">/ 100</span></h3>
+                            </div>
+                        """, unsafe_allow_html=True)
+                
+                    with detail_col4:
+                        kuadran_label = row['Kuadran_Performa'] if 'Kuadran_Performa' in df.columns else "N/A"
+                        color_map = {'On-Track': '#2ecc71', 'Over-Predicted': '#e74c3c', 'Under-Predicted': '#3498db', 'Under-Performing': '#95a5a6'}
+                        text_color = color_map.get(kuadran_label, '#64748B')
+                
+                        st.markdown(f"""
+                            <div style="background: white; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid #E2E8F0; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Kuadran Performa</span>
+                                <h3 style="margin: 0.25rem 0 0 0; font-size: 1.15rem; color: {text_color}; font-weight: 700; white-space: nowrap;">{kuadran_label}</h3>
+                            </div>
+                        """, unsafe_allow_html=True)
+                    with detail_col5:
+                        skor_sdm = row.get("Sentimen_SDM_Skor", 0)
+                        label_sdm = row.get("Sentimen_SDM_Label", "-")
+                        
+                        if label_sdm == "Negatif":
+                            bg_color, border_color, text_color = "#FEF2F2", "#FCA5A5", "#EF4444"
+                        elif label_sdm == "Positif":
+                            bg_color, border_color, text_color = "#ECFDF5", "#A7F3D0", "#10B981"
+                        else:
+                            bg_color, border_color, text_color = "#F0F9FF", "#BAE6FD", "#0284C7"
+                
+                        st.markdown(f"""
+                            <div style="background: {bg_color}; padding: 1rem 1.25rem; border-radius: 0.75rem; border: 1px solid {border_color}; box-shadow: 0 1px 2px rgb(0 0 0 / 0.05); min-height: 90px; display: flex; flex-direction: column; justify-content: center;">
+                                <span style="font-size: 0.75rem; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;">Sentimen & Skor SDM</span>
+                                <h3 style="margin: 0.25rem 0 0 0; font-size: 1.2rem; color: {text_color}; font-weight: 700; white-space: nowrap;">
+                                    {label_sdm} <span style="font-size: 0.9rem; color: #64748B; font-weight: normal;">({skor_sdm:.2f})</span>
+                                </h3>
+                            </div>
+                        """, unsafe_allow_html=True)
+                   
+                    st.markdown("---")
+                    col_left, col_right = st.columns(2)
 
-                with col_left:
-                    st.info(" **Kondisi Fitur Model (Sisi Kuantitatif & Kewilayahan)**")
-                    with st.container(border=True):
-                        st.markdown("##### Demografi & Makro Wilayah")
-                        st.write(f"- **Kabupaten:** {row.get('Kabupaten', '-')}")
-                        st.write(f"- **Kategori Wilayah:** {row.get('kategori_wilayah_mapped', row.get('kategori_wilayah', '-'))}")
-                        st.write(f"- **Tipe Jalan:** {row.get('jalan_mapped', row.get('tipe_jalan', '-'))}")
-                        st.write(f"- **Total Penduduk:** {row.get('penduduk', 0):,} Jiwa")
-                        st.write(f"- **Proporsi Usia Produktif:** {row.get('proporsi_usia_profil', 0) * 100:.1f}%")
-                        st.write(f"- **Tingkat Kemiskinan:** {row.get('kemiskinan', '-')}")
-                        st.write(f"- **Rasio Pria/Wanita:** {row.get('proporsi_pria', '-')}/{row.get('proporsi_wanita', '-')}")
-                        st.write(f"- **UMK Terpeta:** Rp {row.get('umk', 0):,}")
+                    with col_left:
+                        st.info(" **Kondisi Fitur Model (Sisi Kuantitatif & Kewilayahan)**")
+                        with st.container(border=True):
+                            st.markdown("##### Demografi & Makro Wilayah")
+                            st.write(f"- **Kabupaten:** {row.get('Kabupaten', '-')}")
+                            st.write(f"- **Kategori Wilayah:** {row.get('kategori_wilayah_mapped', row.get('kategori_wilayah', '-'))}")
+                            st.write(f"- **Tipe Jalan:** {row.get('jalan_mapped', row.get('tipe_jalan', '-'))}")
+                            st.write(f"- **Total Penduduk:** {row.get('penduduk', 0):,} Jiwa")
+                            st.write(f"- **Proporsi Usia Produktif:** {row.get('proporsi_usia_profil', 0) * 100:.1f}%")
+                            st.write(f"- **Tingkat Kemiskinan:** {row.get('kemiskinan', '-')}")
+                            st.write(f"- **Rasio Pria/Wanita:** {row.get('proporsi_pria', '-')}/{row.get('proporsi_wanita', '-')}")
+                            st.write(f"- **UMK Terpeta:** Rp {row.get('umk', 0):,}")
 
-                    with st.container(border=True):
-                        st.markdown("##### Indikator Spasial & Komersial")
-                        st.write(f"- **Lebar Ruko:** {row.get('lebar_ruko', '-')} Meter")
-                        st.write(f"- **Commercial Hub Index:** {row.get('commercial_hub_index', '-')}")
-                        st.write(f"- **Fasilitas Belanja:** {row.get('jumlah_fasilitas_belanja', '-')}")
-                        st.write(f"- **Jumlah Toko Ponsel:** {row.get('jumlah_toko_ponsel', '-')}")
-                        st.write(f"- **Jumlah Pasar Tradisional:** {row.get('jumlah_pasar_tradisional', '-')}")
-                        st.write(f"- **Jarak Ke Pasar Terdekat:** {row.get('jarak_pasar', '-')} Meter")
-                        st.write(f"- **Jumlah Restoran:** {row.get('jumlah_restoran', '-')}")
-                        st.write(f"- **Jumlah Kompetitor Spasial:** {row.get('jumlah_kompetitor', '-')}")
-                        st.write(f"- **Kepadatan Kompetitor/Populasi:** {row.get('comp_per_pop', '-')}")
+                        with st.container(border=True):
+                            st.markdown("##### Indikator Spasial & Komersial")
+                            st.write(f"- **Lebar Ruko:** {row.get('lebar_ruko', '-')} Meter")
+                            st.write(f"- **Commercial Hub Index:** {row.get('commercial_hub_index', '-')}")
+                            st.write(f"- **Fasilitas Belanja:** {row.get('jumlah_fasilitas_belanja', '-')}")
+                            st.write(f"- **Jumlah Toko Ponsel:** {row.get('jumlah_toko_ponsel', '-')}")
+                            st.write(f"- **Jumlah Pasar Tradisional:** {row.get('jumlah_pasar_tradisional', '-')}")
+                            st.write(f"- **Jarak Ke Pasar Terdekat:** {row.get('jarak_pasar', '-')} Meter")
+                            st.write(f"- **Jumlah Restoran:** {row.get('jumlah_restoran', '-')}")
+                            st.write(f"- **Jumlah Kompetitor Spasial:** {row.get('jumlah_kompetitor', '-')}")
+                            st.write(f"- **Kepadatan Kompetitor/Populasi:** {row.get('comp_per_pop', '-')}")
 
-                    with st.container(border=True):
-                        st.markdown("##### Evaluasi Klastering & Multi-Model")
-                        st.write(f"- **Prediksi OLS:** Rp {row.get('Prediksi_Omzet_OLS', 0):,}")
-                        st.write(f"- **Prediksi RF:** Rp {row.get('Prediksi_Omzet_RF', 0):,}")
-                        st.write(f"- **Prediksi GWR:** Rp {row.get('Prediksi_Omzet_GWR', 0):,}")
+                        with st.container(border=True):
+                            st.markdown("##### Evaluasi Klastering & Multi-Model")
+                            st.write(f"- **Prediksi OLS:** Rp {row.get('Prediksi_Omzet_OLS', 0):,}")
+                            st.write(f"- **Prediksi RF:** Rp {row.get('Prediksi_Omzet_RF', 0):,}")
+                            st.write(f"- **Prediksi GWR:** Rp {row.get('Prediksi_Omzet_GWR', 0):,}")
 
-                with col_right:
-                    st.warning(" **Realitas Riil Cabang (Hasil Form Riset Survei Cabang)**")
-                    with st.expander("1. SDM & Operasional Cabang", expanded=True):
-                        st.write(f"**Lama Beroperasi:** {row.get('Sudah beroperasi berapa lama cabang anda?', '-')}")
-                        st.write(f"**Kategori Class Cabang:** {row.get('Kategori Class Cabang di lokasi anda', '-')}")
-                        st.write(f"**Nama Kanit:** {row.get('Nama Kanit Cabang', '-')} ({row.get('Jabatan Karyawan', '-')})")
-                        st.write(f"**Jumlah Karyawan Aktif:** {row.get('Jumlah Karyawan Cabang Aktif Saat Ini', '-')}")
-                        st.error(f"**Kendala Utama SDM:** {row.get(COL_SDM, '-')}")
-                        st.write(f"**Hambatan Taksiran:** {row.get('Kendala utama yang memperlambat proses taksiran ?', '-')}")
+                    with col_right:
+                        st.warning(" **Realitas Riil Cabang (Hasil Form Riset Survei Cabang)**")
+                        with st.expander("1. SDM & Operasional Cabang", expanded=True):
+                            st.write(f"**Lama Beroperasi:** {row.get('Sudah beroperasi berapa lama cabang anda?', '-')}")
+                            st.write(f"**Kategori Class Cabang:** {row.get('Kategori Class Cabang di lokasi anda', '-')}")
+                            st.write(f"**Nama Kanit:** {row.get('Nama Kanit Cabang', '-')} ({row.get('Jabatan Karyawan', '-')})")
+                            st.write(f"**Jumlah Karyawan Aktif:** {row.get('Jumlah Karyawan Cabang Aktif Saat Ini', '-')}")
+                            st.error(f"**Kendala Utama SDM:** {row.get(COL_SDM, '-')}")
+                            st.write(f"**Hambatan Taksiran:** {row.get('Kendala utama yang memperlambat proses taksiran ?', '-')}")
 
-                    with st.expander("2. Produk, Plafon & Kebijakan Taksiran"):
-                        st.write(f"**Maksimum Plafon Saat Ini:** {row.get('Nilai taksiran maksimum yang bisa diproses cabang ini (plafon)?', '-')}")
-                        st.write(f"**Butuh Kenaikan Plafon?:** {row.get('Apakah cabang membutuhkan kenaikan limit plafon taksiran?', '-')}")
-                        st.error(f"**Barang Paling Sering Ditolak & Alasan:** {row.get('Jenis barang yang paling sering ditolak dan alasannya?', '-')}")
+                        with st.expander("2. Produk, Plafon & Kebijakan Taksiran"):
+                            st.write(f"**Maksimum Plafon Saat Ini:** {row.get('Nilai taksiran maksimum yang bisa diproses cabang ini (plafon)?', '-')}")
+                            st.write(f"**Butuh Kenaikan Plafon?:** {row.get('Apakah cabang membutuhkan kenaikan limit plafon taksiran?', '-')}")
+                            st.error(f"**Barang Paling Sering Ditolak & Alasan:** {row.get('Jenis barang yang paling sering ditolak dan alasannya?', '-')}")
 
-                    with st.expander("3. Aksesibilitas, Fisik Ruko & Lingkungan"):
-                        st.write(f"**Keterlihatan dari Jalan:** {row.get('Seberapa mudah kantor cabang terlihat dari jalan raya?', '-')}")
-                        st.write(f"**Kondisi Parkir:** {row.get('Kondisi parkir di depan cabang — mudah/sulit, berbayar/gratis?', '-')}")
-                        st.write(f"**Isu Banjir / Akses Musiman:** {row.get('Apakah lokasi sering banjir atau ada kendala akses musiman?', '-')}")
+                        with st.expander("3. Aksesibilitas, Fisik Ruko & Lingkungan"):
+                            st.write(f"**Keterlihatan dari Jalan:** {row.get('Seberapa mudah kantor cabang terlihat dari jalan raya?', '-')}")
+                            st.write(f"**Kondisi Parkir:** {row.get('Kondisi parkir di depan cabang — mudah/sulit, berbayar/gratis?', '-')}")
+                            st.write(f"**Isu Banjir / Akses Musiman:** {row.get('Apakah lokasi sering banjir atau ada kendala akses musiman?', '-')}")
 
-                    with st.expander("4. Dinamika Kompetisi Lapangan"):
-                        st.write(f"**Jumlah Kompetitor (Radius 500m):** {row.get('Berapa jumlah kompetitor dalam radius 500 m ?', '-')}")
-                        st.error(f"**Kompetitor Baru (3 Bulan Terakhir):** {row.get('Kompetitor baru yang muncul belakangan ini atau akhir-akhir ini (3 month terakhir). Nama & lokasi?', '-')}")
+                        with st.expander("4. Dinamika Kompetisi Lapangan"):
+                            st.write(f"**Jumlah Kompetitor (Radius 500m):** {row.get('Berapa jumlah kompetitor dalam radius 500 m ?', '-')}")
+                            st.error(f"**Kompetitor Baru (3 Bulan Terakhir):** {row.get('Kompetitor baru yang muncul belakangan ini atau akhir-akhir ini (3 month terakhir). Nama & lokasi?', '-')}")
 
-                    with st.expander("5. Karakteristik & Pola Musiman Nasabah"):
-                        st.write(f"**Tipe Nasabah Dominan:** {row.get('Tipe nasabah yang paling dominan?', '-')}")
-                        st.write(f"**Nasabah Harian (Weekday):** {row.get('Rata-rata jumlah nasabah per hari WEEKDAY (Senin-Jumat)', '-')}")
+                        with st.expander("5. Karakteristik & Pola Musiman Nasabah"):
+                            st.write(f"**Tipe Nasabah Dominan:** {row.get('Tipe nasabah yang paling dominan?', '-')}")
+                            st.write(f"**Nasabah Harian (Weekday):** {row.get('Rata-rata jumlah nasabah per hari WEEKDAY (Senin-Jumat)', '-')}")
 
-                st.markdown("---")
-                st.subheader("Narasi Kualitatif & Strategi Optimalisasi Bisnis Cabang 2026")
-                col_b1, col_b2 = st.columns(2)
-                with col_b1:
-                    with st.container(border=True):
-                        st.markdown("##### Program Sukses & Potensi Wilayah")
-                        st.write(f"**Produk Paling Potensial ke Depan:** {row.get('Menurut pengamatan anda, apa produk yang paling potensial untuk dikembangkan di wilayah cabang ini ke depan?', '-')}")
-                with col_b2:
-                    with st.container(border=True):
-                        st.markdown("##### Saran, Kendala Kritis & Rekomendasi Utama")
-                        st.caption(f"Sentimen Terdeteksi: **{row.get('Sentimen_Saran_Label', '-')}**")
-                        st.warning(f"\"{row.get(COL_SARAN, '-')}\"")
+                    st.markdown("---")
+                    st.subheader("Narasi Kualitatif & Strategi Optimalisasi Bisnis Cabang 2026")
+                    col_b1, col_b2 = st.columns(2)
+                    with col_b1:
+                        with st.container(border=True):
+                            st.markdown("##### Program Sukses & Potensi Wilayah")
+                            st.write(f"**Produk Paling Potensial ke Depan:** {row.get('Menurut pengamatan anda, apa produk yang paling potensial untuk dikembangkan di wilayah cabang ini ke depan?', '-')}")
+                    with col_b2:
+                        with st.container(border=True):
+                            st.markdown("##### Saran, Kendala Kritis & Rekomendasi Utama")
+                            st.caption(f"Sentimen Terdeteksi: **{row.get('Sentimen_Saran_Label', '-')}**")
+                            st.warning(f"\"{row.get(COL_SARAN, '-')}\"")
+                else:
+                    st.error(f"Cabang '{pilihan_cabang}' terdaftar di filter tetapi datanya tidak ditemukan di basis master data.")
 
         # =========================================================================
         # TAB 3: ANALISIS NARATIF & SENTIMEN

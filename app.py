@@ -304,7 +304,7 @@ if check_password():
                 st.plotly_chart(fig_pie, use_container_width=True, key="plotly_pie_exec_dist")
 
             st.markdown("---")
-            st.subheader("Tabel Top 10 Gap Negatif Terbesar (Over-Predicted)")
+            st.subheader("Tabel Top 10 Gap Negatif Terbesar")
             df_gap = df.copy()
             df_gap["Gap_Rp"] = df_gap[col_actual] - df_gap[col_pred]
             top10 = df_gap.sort_values("Gap_Rp").head(10)[

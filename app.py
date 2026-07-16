@@ -3,6 +3,8 @@ from collections import Counter
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import folium
+from streamlit_folium import st_folium
 
 # =============================================================================
 # 1. KONFIGURASI HALAMAN
@@ -248,14 +250,14 @@ try:
                     'Over-Predicted': '#e74c3c',   # Merah (Kritis Audit)
                     'Under-Predicted': '#3498db',  # Biru
                     'Under-Performing': '#95a5a6', # Abu-abu
-                    'Tidak Terdefinisi': '#f1c40f',# Kuning
-                    'Lainnya': '#9b59b6'          # Ungu
+                    'Tidak Terdefinisi': '#f1c40f',
+                    'Lainnya': '#9b59b6'
                 }
             )
-            # Menambahkan garis bantu median aktual dan prediksi
             fig.add_hline(y=med_act_val, line_dash="dash", line_color="gray", annotation_text="Median Aktual")
             fig.add_vline(x=med_pred_val, line_dash="dash", line_color="gray", annotation_text="Median Prediksi")
-            st.plotly_chart(fig, use_container_width=True)
+            # FIX: Menambahkan key unik
+            st.plotly_chart(fig, use_container_width=True, key="plotly_scatter_exec_summary")
 
         with col_b:
             st.subheader("Distribusi Kuadran Performa")
@@ -269,7 +271,8 @@ try:
                                 'Tidak Terdefinisi': '#f1c40f',
                                 'Lainnya': '#9b59b6'
                              })
-            st.plotly_chart(fig_pie, use_container_width=True)
+            # FIX: Menambahkan key unik
+            st.plotly_chart(fig_pie, use_container_width=True, key="plotly_pie_exec_dist")
 
         st.markdown("---")
         st.subheader("Tabel Top 10 Gap Negatif Terbesar (Over-Predicted)")
@@ -432,7 +435,7 @@ try:
 
                 with st.expander("4. Dinamika Kompetisi Lapangan"):
                     st.write(f"**Jumlah Kompetitor (Radius 500m):** {row.get('Berapa jumlah kompetitor dalam radius 500 m ?', '-')}")
-                    st.error(f"**Kompetitor Baru (3 Bulan Terakhir):** {row.get('Kompetitor baru yang muncul belakangan ini atau akhir-akhir ini (3 bulan terakhir). Nama & lokasi?', '-')}")
+                    st.error(f"**Kompetitor Baru (3 Bulan Terakhir):** {row.get('Kompetitor baru yang muncul belakangan ini atau akhir-akhir ini (3 month terakhir). Nama & lokasi?', '-')}")
 
                 with st.expander("5. Karakteristik & Pola Musiman Nasabah"):
                     st.write(f"**Tipe Nasabah Dominan:** {row.get('Tipe nasabah yang paling dominan?', '-')}")
@@ -491,7 +494,8 @@ try:
                         title="Pareto Chart: Frekuensi Kategori Kendala Lapangan"
                     )
                     fig_pareto.update_traces(texttemplate="%{text}%", textposition="outside")
-                    st.plotly_chart(fig_pareto, use_container_width=True)
+                    # FIX: Menambahkan key unik
+                    st.plotly_chart(fig_pareto, use_container_width=True, key="plotly_pareto_kendala")
                 with col_p2:
                     st.dataframe(df_pareto, use_container_width=True, hide_index=True)
 
@@ -512,7 +516,8 @@ try:
             if top_words:
                 df_words = pd.DataFrame(top_words, columns=["Kata", "Frekuensi"])
                 fig_words = px.bar(df_words, x="Kata", y="Frekuensi")
-                st.plotly_chart(fig_words, use_container_width=True)
+                # FIX: Menambahkan key unik
+                st.plotly_chart(fig_words, use_container_width=True, key="plotly_bar_top_words")
 
         st.markdown("---")
         st.subheader("B. Sentiment Analysis (Lexicon-Based, Bahasa Indonesia)")
@@ -523,14 +528,16 @@ try:
                 fig_sdm = px.pie(df_naratif, names="Sentimen_SDM_Label", hole=0.4,
                                   color="Sentimen_SDM_Label",
                                   color_discrete_map={"Negatif": "#EF553B", "Positif": "#00CC96", "Netral": "#636EFA"})
-                st.plotly_chart(fig_sdm, use_container_width=True)
+                # FIX: Menambahkan key unik
+                st.plotly_chart(fig_sdm, use_container_width=True, key="plotly_pie_sentimen_sdm")
         with col_s2:
             if "Sentimen_Saran_Label" in df_naratif.columns:
                 st.markdown("##### Distribusi Sentimen — Saran & Kendala Kritis")
                 fig_saran = px.pie(df_naratif, names="Sentimen_Saran_Label", hole=0.4,
                                     color="Sentimen_Saran_Label",
                                     color_discrete_map={"Negatif": "#EF553B", "Positif": "#00CC96", "Netral": "#636EFA"})
-                st.plotly_chart(fig_saran, use_container_width=True)
+                # FIX: Menambahkan key unik
+                st.plotly_chart(fig_saran, use_container_width=True, key="plotly_pie_sentimen_saran")
 
     # =========================================================================
     # TAB 4: FEATURE VALIDITY & REKOMENDASI MODEL
@@ -552,16 +559,102 @@ try:
                 'Over-Predicted': '#e74c3c',   # Merah (Kritis Audit)
                 'Under-Predicted': '#3498db',  # Biru
                 'Under-Performing': '#95a5a6', # Abu-abu
-                'Tidak Terdefinisi': '#f1c40f',# Kuning
-                'Lainnya': '#9b59b6'          # Ungu
+                'Tidak Terdefinisi': '#f1c40f',
+                'Lainnya': '#9b59b6'
             }
         )
         fig_km.add_hline(y=med_act_val, line_dash="dash", line_color="gray", annotation_text="Median Aktual")
         fig_km.add_vline(x=med_pred_val, line_dash="dash", line_color="gray", annotation_text="Median Prediksi")
-        st.plotly_chart(fig_km, use_container_width=True)
+        # FIX: Menambahkan key unik
+        st.plotly_chart(fig_km, use_container_width=True, key="plotly_scatter_sebaran_kuadran")
 
         st.markdown("---")
-        st.subheader("B. Priority Action Matrix (Impact vs Actionability)")
+        
+        # =====================================================================
+        # FITUR BARU: POIN B - PETA FOLIUM CABANG
+        # =====================================================================
+        st.subheader("B. Peta Sebaran & Kuadran Performa Geografis Cabang")
+        
+        # Cek ketersediaan kolom koordinat (mendukung berbagai format penulisan kolom)
+        col_lat_candidates = [c for c in df.columns if c.lower() in ["latitude", "lat", "lintang"]]
+        col_lon_candidates = [c for c in df.columns if c.lower() in ["longitude", "lon", "long", "bujur"]]
+        
+        if col_lat_candidates and col_lon_candidates:
+            col_lat = col_lat_candidates[0]
+            col_lon = col_lon_candidates[0]
+            
+            # Bersihkan data koordinat yang kosong/null
+            df_map = df.dropna(subset=[col_lat, col_lon]).copy()
+            
+            if not df_map.empty:
+                # Titik tengah peta dinamis berdasarkan rata-rata koordinat data
+                map_center_lat = df_map[col_lat].mean()
+                map_center_lon = df_map[col_lon].mean()
+                
+                # Inisialisasi peta folium
+                map_obj = folium.Map(location=[map_center_lat, map_center_lon], zoom_start=8, control_scale=True)
+                
+                # Pemetaan warna marker sesuai kuadran performa
+                marker_color_map = {
+                    'On-Track': '#2ecc71',        # Hijau
+                    'Over-Predicted': '#e74c3c',   # Merah
+                    'Under-Predicted': '#3498db',  # Biru
+                    'Under-Performing': '#95a5a6'  # Abu-abu
+                }
+                
+                # Plot marker per cabang
+                for _, row_map in df_map.iterrows():
+                    lat_val = float(row_map[col_lat])
+                    lon_val = float(row_map[col_lon])
+                    q_val = row_map.get("Kuadran_Performa", "Under-Performing")
+                    color_hex = marker_color_map.get(q_val, '#95a5a6')
+                    
+                    # Tooltip & Popup HTML yang interaktif
+                    cabang_nama = row_map.get("Nama Cabang", "Cabang Tanpa Nama")
+                    kab_nama = row_map.get("Kabupaten", "-")
+                    val_act = row_map.get(col_actual, 0)
+                    val_prd = row_map.get(col_pred, 0)
+                    
+                    popup_html = f"""
+                    <div style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; width: 220px; line-height: 1.5;">
+                        <h4 style="margin: 0 0 5px 0; color: #1e293b; border-bottom: 2px solid {color_hex}; padding-bottom: 3px;">{cabang_nama}</h4>
+                        <b style="color: #64748b;">Wilayah:</b> {kab_nama}<br>
+                        <b style="color: #64748b;">Status Kuadran:</b> <span style="color: {color_hex}; font-weight: bold;">{q_val}</span><br>
+                        <b style="color: #64748b;">Omzet Aktual:</b> Rp {val_act:,.0f}<br>
+                        <b style="color: #64748b;">Prediksi:</b> Rp {val_prd:,.0f}<br>
+                    </div>
+                    """
+                    
+                    folium.CircleMarker(
+                        location=[lat_val, lon_val],
+                        radius=8,
+                        popup=folium.Popup(popup_html, max_width=250),
+                        tooltip=f"{cabang_nama} ({q_val})",
+                        color='#ffffff',
+                        weight=1.5,
+                        fill=True,
+                        fill_color=color_hex,
+                        fill_opacity=0.85
+                    ).add_to(map_obj)
+                
+                # Tampilkan peta ke Streamlit dengan key unik
+                st_folium(map_obj, width="100%", height=500, key="folium_map_cabang_performa")
+                
+                # Legenda Peta
+                st.markdown("""
+                **Legenda Kuadran Performa:**  
+                🟢 <span style="color:#2ecc71; font-weight:bold;">On-Track</span> (Omzet & Prediksi $\ge$ Median) | 
+                🔴 <span style="color:#e74c3c; font-weight:bold;">Over-Predicted</span> (Omzet < Median, Prediksi $\ge$ Median - **Prioritas Utama Audit**) | 
+                🔵 <span style="color:#3498db; font-weight:bold;">Under-Predicted</span> (Omzet $\ge$ Median, Prediksi < Median - **Hidden Gem**) | 
+                ⚪ <span style="color:#95a5a6; font-weight:bold;">Under-Performing</span> (Omzet & Prediksi < Median)
+                """, unsafe_allow_html=True)
+            else:
+                st.warning("Tidak ditemukan baris koordinat yang valid di database untuk dirender ke dalam peta.")
+        else:
+            st.warning("Kolom koordinat ('latitude' dan 'longitude') tidak dideteksi pada file dataset. Harap periksa nama kolom koordinat Anda.")
+
+        st.markdown("---")
+        st.subheader("C. Priority Action Matrix (Impact vs Actionability)")
         if "Kategori_Kendala" in df_mismatch.columns and len(df_mismatch) > 0:
             FAKTOR_INTERNAL = {"SDM & Operasional", "Sistem & Plafon", "Fisik Bangunan/Ruko"}
             FAKTOR_EKSTERNAL = {"Kompetitor / Persaingan", "Akses & Parkir", "Ekonomi & Daya Beli"}
@@ -586,7 +679,8 @@ try:
                     labels={"Gap_Abs": "Besaran Gap (Rp, absolut)", "Actionability": "Skor Actionability (0=Eksternal, 1=Internal)"},
                     size="Gap_Abs"
                 )
-                st.plotly_chart(fig_priority, use_container_width=True)
+                # FIX: Menambahkan key unik
+                st.plotly_chart(fig_priority, use_container_width=True, key="plotly_scatter_priority_matrix")
                 st.caption("Prioritas tertinggi: kanan-atas (gap besar & mudah diperbaiki/internal).")
             else:
                 st.info("Belum cukup data kategori kendala pada cabang mismatch untuk membangun matrix.")

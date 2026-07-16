@@ -74,7 +74,7 @@ if check_password():
         "training", "anak baru", "attitude", "disiplin", "menyepelekan", "introvert"],
         "Sistem & Plafon": ["sistem", "error", "down", "aplikasi", "kosong", "plafon", "taksiran", "limit"],
         "Ekonomi & Daya Beli": ["sepi", "daya beli", "ekonomi", "turun", "menurun", "pemukiman sepi", "lesu"],
-        "Fisik Bangunan/Ruko": ["renovasi", "sempit", "luas ruko", "branding", "papan nama", "sinyal","panas", "pengap", "debu", "sekat", "kaca", "ac", "kursi tunggu", "privasi"],
+        "Fisik Bangunan/Ruko": ["peremajaan","renovasi", "sempit", "luas ruko", "branding", "papan nama", "sinyal","panas", "pengap", "debu", "sekat", "kaca", "ac", "kursi tunggu", "privasi"],
     }
 
     KATA_NEGATIF = [

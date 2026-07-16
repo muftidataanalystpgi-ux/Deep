@@ -68,12 +68,13 @@ if check_password():
     # 4. KAMUS & FUNGSI ANALISIS TEKS (Text Mining, Pareto, Sentimen)
     # =============================================================================
     KATEGORI_KENDALA = {
-        "Kompetitor / Persaingan": ["kompetitor", "pesaing", "diskon", "predatory", "bakar uang", "promo gencar"],
-        "Akses & Parkir": ["akses", "jalan", "parkir", "macet", "banjir", "ditutup", "rusak", "proyek"],
-        "SDM & Operasional": ["karyawan", "staf", "sdm", "absen", "tidak masuk", "kurang orang", "pelayanan"],
-        "Sistem & Plafon": ["sistem", "error", "down", "stok", "kosong", "plafon", "taksiran", "limit"],
+        "Kompetitor / Persaingan": ["kompetitor", "pesaing", "diskon", "predatory", "bakar uang", "promo gencar", "tebus cepat", "diskon jasa"],
+        "Akses & Parkir": ["akses", "jalan", "parkir", "macet", "banjir", "ditutup", "rusak", "proyek", "terhalang", "pohon", "ruko sebelah"],
+        "SDM & Operasional": ["karyawan", "staf", "sdm", "absen", "tidak masuk", "kurang orang", "pelayanan", "shifting", "double jobdesk", "kanit", "kepala unit", 
+        "training", "anak baru", "attitude", "disiplin", "menyepelekan", "introvert"],
+        "Sistem & Plafon": ["sistem", "error", "down", "aplikasi", "kosong", "plafon", "taksiran", "limit"],
         "Ekonomi & Daya Beli": ["sepi", "daya beli", "ekonomi", "turun", "menurun", "pemukiman sepi", "lesu"],
-        "Fisik Bangunan/Ruko": ["renovasi", "sempit", "luas ruko", "branding", "papan nama", "sinyal"],
+        "Fisik Bangunan/Ruko": ["renovasi", "sempit", "luas ruko", "branding", "papan nama", "sinyal","panas", "pengap", "debu", "sekat", "kaca", "ac", "kursi tunggu", "privasi"],
     }
 
     KATA_NEGATIF = [
@@ -81,13 +82,15 @@ if check_password():
         "tutup", "macet", "kendala", "masalah", "komplain", "mengeluh", "menurun",
         "terbatas", "kekurangan", "tidak memadai", "tidak cukup", "susah",
         "bermasalah", "gagal", "hilang", "menghambat", "lemah", "minim", "sering tidak masuk",
-        "predatory", "bakar uang", "banjir", "proyek", "ditutup", "ditolak",
+        "predatory", "bakar uang", "banjir", "proyek", "ditutup", "ditolak","panas", "pengap",
+        "debu", "terhalang", "double jobdesk", "menyepelekan", "mepet", "introvert", "malu", "tidak nyaman"
     ]
 
     KATA_POSITIF = [
         "baik", "lancar", "cukup", "berhasil", "meningkat", "ramai", "mudah",
         "strategis", "potensial", "bagus", "optimal", "memadai", "nyaman",
         "stabil", "berkembang", "lengkap", "aktif", "loyal", "signifikan", "sukses",
+        "tebus cepat", "hadiah langsung", "adem", "sejuk", "aman", "tertib"
     ]
 
     def kategorikan_teks(teks: str):

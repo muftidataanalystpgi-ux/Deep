@@ -256,7 +256,6 @@ try:
             )
             fig.add_hline(y=med_act_val, line_dash="dash", line_color="gray", annotation_text="Median Aktual")
             fig.add_vline(x=med_pred_val, line_dash="dash", line_color="gray", annotation_text="Median Prediksi")
-            # FIX: Menambahkan key unik
             st.plotly_chart(fig, use_container_width=True, key="plotly_scatter_exec_summary")
 
         with col_b:
@@ -271,7 +270,6 @@ try:
                                 'Tidak Terdefinisi': '#f1c40f',
                                 'Lainnya': '#9b59b6'
                              })
-            # FIX: Menambahkan key unik
             st.plotly_chart(fig_pie, use_container_width=True, key="plotly_pie_exec_dist")
 
         st.markdown("---")
@@ -494,7 +492,6 @@ try:
                         title="Pareto Chart: Frekuensi Kategori Kendala Lapangan"
                     )
                     fig_pareto.update_traces(texttemplate="%{text}%", textposition="outside")
-                    # FIX: Menambahkan key unik
                     st.plotly_chart(fig_pareto, use_container_width=True, key="plotly_pareto_kendala")
                 with col_p2:
                     st.dataframe(df_pareto, use_container_width=True, hide_index=True)
@@ -516,7 +513,6 @@ try:
             if top_words:
                 df_words = pd.DataFrame(top_words, columns=["Kata", "Frekuensi"])
                 fig_words = px.bar(df_words, x="Kata", y="Frekuensi")
-                # FIX: Menambahkan key unik
                 st.plotly_chart(fig_words, use_container_width=True, key="plotly_bar_top_words")
 
         st.markdown("---")
@@ -528,7 +524,6 @@ try:
                 fig_sdm = px.pie(df_naratif, names="Sentimen_SDM_Label", hole=0.4,
                                   color="Sentimen_SDM_Label",
                                   color_discrete_map={"Negatif": "#EF553B", "Positif": "#00CC96", "Netral": "#636EFA"})
-                # FIX: Menambahkan key unik
                 st.plotly_chart(fig_sdm, use_container_width=True, key="plotly_pie_sentimen_sdm")
         with col_s2:
             if "Sentimen_Saran_Label" in df_naratif.columns:
@@ -536,7 +531,6 @@ try:
                 fig_saran = px.pie(df_naratif, names="Sentimen_Saran_Label", hole=0.4,
                                     color="Sentimen_Saran_Label",
                                     color_discrete_map={"Negatif": "#EF553B", "Positif": "#00CC96", "Netral": "#636EFA"})
-                # FIX: Menambahkan key unik
                 st.plotly_chart(fig_saran, use_container_width=True, key="plotly_pie_sentimen_saran")
 
     # =========================================================================
@@ -565,17 +559,15 @@ try:
         )
         fig_km.add_hline(y=med_act_val, line_dash="dash", line_color="gray", annotation_text="Median Aktual")
         fig_km.add_vline(x=med_pred_val, line_dash="dash", line_color="gray", annotation_text="Median Prediksi")
-        # FIX: Menambahkan key unik
         st.plotly_chart(fig_km, use_container_width=True, key="plotly_scatter_sebaran_kuadran")
 
         st.markdown("---")
         
         # =====================================================================
-        # FITUR BARU: POIN B - PETA FOLIUM CABANG
+        # B. PETA FOLIUM CABANG (Default Terpusat di Jakarta)
         # =====================================================================
         st.subheader("B. Peta Sebaran & Kuadran Performa Geografis Cabang")
         
-        # Cek ketersediaan kolom koordinat (mendukung berbagai format penulisan kolom)
         col_lat_candidates = [c for c in df.columns if c.lower() in ["latitude", "lat", "lintang"]]
         col_lon_candidates = [c for c in df.columns if c.lower() in ["longitude", "lon", "long", "bujur"]]
         
@@ -583,18 +575,12 @@ try:
             col_lat = col_lat_candidates[0]
             col_lon = col_lon_candidates[0]
             
-            # Bersihkan data koordinat yang kosong/null
             df_map = df.dropna(subset=[col_lat, col_lon]).copy()
             
             if not df_map.empty:
-                # Titik tengah peta dinamis berdasarkan rata-rata koordinat data
-                map_center_lat = df_map[col_lat].mean()
-                map_center_lon = df_map[col_lon].mean()
+                # DEFAULT TAMPILAN PETA LANGSUNG DI JAKARTA (Latitude: -6.2088, Longitude: 106.8456)
+                map_obj = folium.Map(location=[-6.2088, 106.8456], zoom_start=10, control_scale=True)
                 
-                # Inisialisasi peta folium
-                map_obj = folium.Map(location=[map_center_lat, map_center_lon], zoom_start=8, control_scale=True)
-                
-                # Pemetaan warna marker sesuai kuadran performa
                 marker_color_map = {
                     'On-Track': '#2ecc71',        # Hijau
                     'Over-Predicted': '#e74c3c',   # Merah
@@ -602,14 +588,12 @@ try:
                     'Under-Performing': '#95a5a6'  # Abu-abu
                 }
                 
-                # Plot marker per cabang
                 for _, row_map in df_map.iterrows():
                     lat_val = float(row_map[col_lat])
                     lon_val = float(row_map[col_lon])
                     q_val = row_map.get("Kuadran_Performa", "Under-Performing")
                     color_hex = marker_color_map.get(q_val, '#95a5a6')
                     
-                    # Tooltip & Popup HTML yang interaktif
                     cabang_nama = row_map.get("Nama Cabang", "Cabang Tanpa Nama")
                     kab_nama = row_map.get("Kabupaten", "-")
                     val_act = row_map.get(col_actual, 0)
@@ -637,10 +621,8 @@ try:
                         fill_opacity=0.85
                     ).add_to(map_obj)
                 
-                # Tampilkan peta ke Streamlit dengan key unik
                 st_folium(map_obj, width="100%", height=500, key="folium_map_cabang_performa")
                 
-                # Legenda Peta
                 st.markdown("""
                 **Legenda Kuadran Performa:**  
                 🟢 <span style="color:#2ecc71; font-weight:bold;">On-Track</span> (Omzet & Prediksi $\ge$ Median) | 
@@ -679,7 +661,6 @@ try:
                     labels={"Gap_Abs": "Besaran Gap (Rp, absolut)", "Actionability": "Skor Actionability (0=Eksternal, 1=Internal)"},
                     size="Gap_Abs"
                 )
-                # FIX: Menambahkan key unik
                 st.plotly_chart(fig_priority, use_container_width=True, key="plotly_scatter_priority_matrix")
                 st.caption("Prioritas tertinggi: kanan-atas (gap besar & mudah diperbaiki/internal).")
             else:

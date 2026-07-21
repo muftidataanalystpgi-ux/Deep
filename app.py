@@ -557,9 +557,32 @@ if check_password():
                     n=20
                 )
                 if top_words:
-                    df_words = pd.DataFrame(top_words, columns=["Kata", "Frekuensi"])
-                    fig_words = px.bar(df_words, x="Kata", y="Frekuensi")
-                    st.plotly_chart(fig_words, use_container_width=True, key="plotly_bar_top_words")
+                    col_w1, col_w2 = st.columns(2)
+                    with col_w1:
+                        df_words = pd.DataFrame(top_words, columns=["Kata", "Frekuensi"])
+                        fig_words = px.bar(df_words, x="Kata", y="Frekuensi", title="Top 20 Kata Paling Sering Muncul")
+                        st.plotly_chart(fig_words, use_container_width=True, key="plotly_bar_top_words")
+                    
+                    with col_w2:
+                        # TAMBAHAN FITUR: Word Cloud berbasis Plotly Scatter / Text
+                        import numpy as np
+                        df_cloud = pd.DataFrame(top_words, columns=["Kata", "Frekuensi"])
+                        
+                        # Generate posisi acak yang terdistribusi untuk visualisasi Awan Kata (Word Cloud)
+                        np.random.seed(42)
+                        df_cloud["x"] = np.random.uniform(-10, 10, len(df_cloud))
+                        df_cloud["y"] = np.random.uniform(-10, 10, len(df_cloud))
+                        
+                        fig_cloud = px.scatter(
+                            df_cloud, x="x", y="y", text="Kata", size="Frekuensi", color="Frekuensi",
+                            size_max=45, color_continuous_scale="Viridis",
+                            title="Awan Kata (Word Cloud) Kendala Lapangan"
+                        )
+                        fig_cloud.update_traces(textposition='middle center', textfont_size=df_cloud["Frekuensi"]*1.2)
+                        fig_cloud.update_xaxes(visible=False)
+                        fig_cloud.update_yaxes(visible=False)
+                        fig_cloud.update_layout(showlegend=False, plot_bgcolor="rgba(0,0,0,0)")
+                        st.plotly_chart(fig_cloud, use_container_width=True, key="plotly_wordcloud")
 
             st.markdown("---")
             st.subheader("B. Sentiment Analysis (Lexicon-Based, Bahasa Indonesia)")

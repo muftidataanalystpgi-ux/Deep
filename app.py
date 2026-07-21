@@ -1,6 +1,7 @@
 import re
 from collections import Counter
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import streamlit as st
 import folium
@@ -26,15 +27,16 @@ def check_password():
     if st.session_state["password_correct"]:
         return True
 
-    st.center = st.columns([1, 2, 1])
-    with st.center[1]:
+    # Perbaikan: Menggunakan variabel terpisah (bukan st.center)
+    col_left, col_mid, col_right = st.columns([1, 2, 1])
+    with col_mid:
         st.markdown("<br><br>", unsafe_allow_html=True)
         st.title("🔒 Akses Terbatas")
         st.write("Silakan masukkan password untuk mengakses Dashboard PGI.")
         
-        user_password = st.text_input("Password", type="password", placeholder="Masukkan password di sini")
+        user_password = st.text_input("Password", type="password", placeholder="Masukkan password di sini", key="login_pass_input")
         
-        if st.button("Masuk"):
+        if st.button("Masuk", key="login_button"):
             if user_password == "1juta$":
                 st.session_state["password_correct"] = True
                 st.rerun()
@@ -156,12 +158,11 @@ if check_password():
         return df.apply(_kuadran, axis=1), med_actual, med_pred
 
     # =============================================================================
-    # 6. MAIN APPLICATION LOGIC (EVALUASI UTAMA)
+    # 6. MAIN APPLICATION LOGIC
     # =============================================================================
     try:
         df = load_data_from_link()
 
-        # Inisialisasi Pilihan Model Global
         MODEL_MAP = {
             "Random Forest": ("Prediksi_Omzet_RF", "Mismatch_RF", "Kategori_Prediksi_RF"),
             "OLS": ("Prediksi_Omzet_OLS", "Mismatch_OLS", "Kategori_Prediksi_OLS"),
@@ -180,10 +181,8 @@ if check_password():
         )
         col_pred, col_mismatch, col_kat_pred = MODEL_MAP[model_terpilih]
 
-        # MENGGUNAKAN KLASIFIKASI KUADRAN BERBASIS MEDIAN
         df['Kuadran_Performa'], med_act_val, med_pred_val = klasifikasikan_kuadran(df, col_actual, col_pred)
 
-        # Pemrosesan Kolom Bantu Teks & Sentimen
         COL_SDM = "Kendala utama terkait pengelolaan SDM di cabang saat ini"
         COL_SARAN = "Tuliskan saran, kendala kritis, atau rekomendasi strategis lainnya dari tim cabang untuk optimalisasi performa bisnis 2026"
 
@@ -280,12 +279,10 @@ if check_password():
                     hover_name="Nama Cabang",
                     labels={col_pred: f"Prediksi Omzet ({model_terpilih})", col_actual: "Omzet Aktual"},
                     color_discrete_map={
-                        'On-Track': '#2ecc71',        # Hijau
-                        'Over-Predicted': '#e74c3c',   # Merah
-                        'Under-Predicted': '#3498db',  # Biru
-                        'Under-Performing': '#95a5a6', # Abu-abu
-                        'Tidak Terdefinisi': '#f1c40f',
-                        'Lainnya': '#9b59b6'
+                        'On-Track': '#2ecc71',
+                        'Over-Predicted': '#e74c3c',
+                        'Under-Predicted': '#3498db',
+                        'Under-Performing': '#95a5a6'
                     }
                 )
                 fig.add_hline(y=med_act_val, line_dash="dash", line_color="gray", annotation_text="Median Aktual")
@@ -300,9 +297,7 @@ if check_password():
                                     'On-Track': '#2ecc71',
                                     'Over-Predicted': '#e74c3c',
                                     'Under-Predicted': '#3498db',
-                                    'Under-Performing': '#95a5a6',
-                                    'Tidak Terdefinisi': '#f1c40f',
-                                    'Lainnya': '#9b59b6'
+                                    'Under-Performing': '#95a5a6'
                                  })
                 st.plotly_chart(fig_pie, use_container_width=True, key="plotly_pie_exec_dist")
 
@@ -340,7 +335,6 @@ if check_password():
             if filter_kuadran != "Semua Klaster":
                 df_filtered = df_filtered[df_filtered["Kuadran_Performa"] == filter_kuadran]
 
-            # Proteksi string 'nan' atau nilai kosong agar tidak masuk list seleksi
             if 'Nama Cabang' in df_filtered.columns:
                 df_filtered = df_filtered.dropna(subset=['Nama Cabang'])
                 df_filtered = df_filtered[df_filtered['Nama Cabang'].astype(str).str.lower() != 'nan']
@@ -356,7 +350,6 @@ if check_password():
                     pilihan_cabang = st.selectbox("Pilih Target Cabang untuk Di-audit:", list_cabang)
 
             if pilihan_cabang:
-                # Proteksi pengecekan ketersediaan baris sebelum mengambil elemen ke-0 (.iloc[0])
                 matched_rows = df[df['Nama Cabang'] == pilihan_cabang]
                 
                 if not matched_rows.empty:
@@ -564,11 +557,8 @@ if check_password():
                         st.plotly_chart(fig_words, use_container_width=True, key="plotly_bar_top_words")
                     
                     with col_w2:
-                        # TAMBAHAN FITUR: Word Cloud berbasis Plotly Scatter / Text
-                        import numpy as np
                         df_cloud = pd.DataFrame(top_words, columns=["Kata", "Frekuensi"])
                         
-                        # Generate posisi acak yang terdistribusi untuk visualisasi Awan Kata (Word Cloud)
                         np.random.seed(42)
                         df_cloud["x"] = np.random.uniform(-10, 10, len(df_cloud))
                         df_cloud["y"] = np.random.uniform(-10, 10, len(df_cloud))
@@ -618,12 +608,10 @@ if check_password():
                 hover_name="Nama Cabang",
                 labels={col_pred: f"Prediksi Omzet ({model_terpilih})", col_actual: "Omzet Aktual"},
                 color_discrete_map={
-                    'On-Track': '#2ecc71',        # Hijau
-                    'Over-Predicted': '#e74c3c',   # Merah
-                    'Under-Predicted': '#3498db',  # Biru
-                    'Under-Performing': '#95a5a6', # Abu-abu
-                    'Tidak Terdefinisi': '#f1c40f',
-                    'Lainnya': '#9b59b6'
+                    'On-Track': '#2ecc71',
+                    'Over-Predicted': '#e74c3c',
+                    'Under-Predicted': '#3498db',
+                    'Under-Performing': '#95a5a6'
                 }
             )
             fig_km.add_hline(y=med_act_val, line_dash="dash", line_color="gray", annotation_text="Median Aktual")
@@ -644,7 +632,6 @@ if check_password():
                 df_map = df.dropna(subset=[col_lat, col_lon]).copy()
                 
                 if not df_map.empty:
-                    # Tampilan peta langsung default di Jakarta
                     map_obj = folium.Map(location=[-6.2088, 106.8456], zoom_start=10, control_scale=True)
                     
                     marker_color_map = {
@@ -655,8 +642,12 @@ if check_password():
                     }
                     
                     for _, row_map in df_map.iterrows():
-                        lat_val = float(row_map[col_lat])
-                        lon_val = float(row_map[col_lon])
+                        try:
+                            lat_val = float(row_map[col_lat])
+                            lon_val = float(row_map[col_lon])
+                        except ValueError:
+                            continue
+
                         q_val = row_map.get("Kuadran_Performa", "Under-Performing")
                         color_hex = marker_color_map.get(q_val, '#95a5a6')
                         
@@ -666,12 +657,12 @@ if check_password():
                         val_prd = row_map.get(col_pred, 0)
                         
                         popup_html = f"""
-                        <div style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; width: 220px; line-height: 1.5;">
-                            <h4 style="margin: 0 0 5px 0; color: #1e293b; border-bottom: 2px solid {color_hex}; padding-bottom: 3px;">{cabang_nama}</h4>
-                            <b style="color: #64748b;">Wilayah:</b> {kab_nama}<br>
-                            <b style="color: #64748b;">Status Kuadran:</b> <span style="color: {color_hex}; font-weight: bold;">{q_val}</span><br>
-                            <b style="color: #64748b;">Omzet Aktual:</b> Rp {val_act:,.0f}<br>
-                            <b style="color: #64748b;">Prediksi:</b> Rp {val_prd:,.0f}<br>
+                        <div style="font-family: Arial, sans-serif; font-size: 12px; width: 220px;">
+                            <h4 style="margin: 0 0 5px 0; color: #1e293b;">{cabang_nama}</h4>
+                            <b>Wilayah:</b> {kab_nama}<br>
+                            <b>Status:</b> <span style="color: {color_hex}; font-weight: bold;">{q_val}</span><br>
+                            <b>Omzet Aktual:</b> Rp {val_act:,.0f}<br>
+                            <b>Prediksi:</b> Rp {val_prd:,.0f}<br>
                         </div>
                         """
                         
@@ -687,7 +678,7 @@ if check_password():
                             fill_opacity=0.85
                         ).add_to(map_obj)
                     
-                    st_folium(map_obj, width="100%", height=500, key="folium_map_cabang_performa")
+                    st_folium(map_obj, width="100%", height=500, returned_objects=[], key="folium_map_cabang_performa")
                     
                     st.markdown("""
                     **Legenda Kuadran Performa:**  
@@ -699,7 +690,7 @@ if check_password():
                 else:
                     st.warning("Tidak ditemukan baris koordinat yang valid di database untuk dirender ke dalam peta.")
             else:
-                st.warning("Kolom koordinat ('latitude' dan 'longitude') tidak dideteksi pada file dataset. Harap periksa nama kolom koordinat Anda.")
+                st.warning("Kolom koordinat ('latitude' dan 'longitude') tidak dideteksi pada file dataset.")
 
             st.markdown("---")
             st.subheader("C. Priority Action Matrix (Impact vs Actionability)")
